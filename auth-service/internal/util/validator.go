@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-playground/validator/v10"
 	"go.opentelemetry.io/otel/trace"
@@ -29,10 +30,23 @@ func (v *Validator) Validate(ctx context.Context, data interface{}) *validationE
 		validationErrors := err.(validator.ValidationErrors)
 
 		for _, e := range validationErrors {
-			validationErrorsString[e.Field()] = e.Tag()
+			validationErrorsString[e.Field()] = getErrorMessage(e)
 		}
 
 		return &validationError{errors: validationErrorsString}
 	}
 	return nil
+}
+
+func getErrorMessage(err validator.FieldError) string {
+	switch err.Tag() {
+	case "required":
+		return fmt.Sprintf("The %s field is required", err.Field())
+	case "email":
+		return fmt.Sprintf("The %s field must be a valid email", err.Field())
+	case "gte":
+		return fmt.Sprintf("The %s field must be greater than or equal to %s", err.Field(), err.Param())
+	default:
+		return fmt.Sprintf("The %s field is invalid", err.Field())
+	}
 }

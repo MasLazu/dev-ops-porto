@@ -29,7 +29,7 @@ func (rw *ResponseWriter) WriteInternalServerErrorResponse(ctx context.Context, 
 }
 
 func (rw *ResponseWriter) WriteValidationErrorResponse(ctx context.Context, w http.ResponseWriter, err validationError) {
-	rw.WriteJSONResponse(ctx, w, http.StatusBadRequest, "validation error", err)
+	rw.WriteJSONResponse(ctx, w, http.StatusBadRequest, "validation error", err.errors)
 }
 
 func (rw *ResponseWriter) WriteBadRequestResponse(ctx context.Context, w http.ResponseWriter) {
