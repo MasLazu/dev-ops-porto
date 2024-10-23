@@ -21,7 +21,7 @@ func NewValidator(tracer trace.Tracer) *Validator {
 }
 
 func (v *Validator) Validate(ctx context.Context, data interface{}) *validationError {
-	_, span := v.tracer.Start(ctx, "valodating request")
+	_, span := v.tracer.Start(ctx, "validating request")
 	defer span.End()
 
 	if err := v.validate.Struct(data); err != nil {

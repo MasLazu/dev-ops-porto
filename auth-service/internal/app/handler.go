@@ -51,7 +51,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	var req registerUserRequest
-	if err := h.requestDecoder.Decode(r, &req); err != nil {
+	if err := h.requestDecoder.Decode(ctx, r, &req); err != nil {
 		h.responseWriter.WriteBadRequestResponse(ctx, w)
 		return
 	}
