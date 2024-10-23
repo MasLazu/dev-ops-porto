@@ -1,0 +1,59 @@
+services:
+  psql:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auth_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - psql_volume:/var/lib/postgresql/data
+
+  auth-service:
+    build:
+      context: ./auth-service
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    depends_on:
+      - psql
+      - otel-collector
+    environment:
+      PORT: 80
+      APP_ENV: local
+      DB_HOST: psql
+      DB_PORT: 5432
+      DB_DATABASE: auth_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SCHEMA: public
+      OTLP_DOMAIN: otel-collector:4317
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otel/config.yaml
+    # ports:
+    #   - 1888:1888 # pprof extension
+    #   - 8888:8888 # Prometheus metrics exposed by the Collector
+    #   - 8889:8889 # Prometheus exporter metrics
+    #   - 13133:13133 # health_check extension
+    #   - 4317:4317 # OTLP gRPC receiver
+    #   - 4318:4318 # OTLP http receiver
+    #   - 55679:55679 # zpages extension
+    command: ["--config=/etc/otel/config.yaml"]
+  
+  jaeger:
+    image: jaegertracing/all-in-one:1.6.0
+    container_name: jaeger
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - 16686:16686
+    restart: unless-stopped
+
+volumes:
+  psql_volume:
+  otel-collector:

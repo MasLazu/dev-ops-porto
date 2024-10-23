@@ -1,0 +1,39 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 500
+    spike_limit_mib: 200
+    limit_percentage: 80
+
+exporters:
+  zipkin:
+    endpoint: http://jaeger:9411/api/v2/spans
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:8181
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, memory_limiter]
+      exporters: [zipkin]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch, memory_limiter]
+      exporters: [prometheus]
+
+  telemetry:
+    metrics:
+      level: basic
+    logs:
+      level: info
