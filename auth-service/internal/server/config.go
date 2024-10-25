@@ -11,6 +11,7 @@ type config struct {
 	port       int
 	otlpDomain string
 	database   database.Config
+	jwtSecret  []byte
 }
 
 func getConfig() (config, error) {
@@ -27,6 +28,7 @@ func getConfig() (config, error) {
 	return config{
 		port:       port,
 		otlpDomain: os.Getenv("OTLP_DOMAIN"),
+		jwtSecret:  []byte(os.Getenv("JWT_SECRET")),
 		database:   dbConfig,
 	}, nil
 }

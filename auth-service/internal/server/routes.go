@@ -16,6 +16,7 @@ func (s *Server) setupRoutes() http.Handler {
 
 	r.Get("/health", s.handler.HealthCheckHandler)
 	r.Post("/register", s.handler.Register)
+	r.Post("/login", s.handler.Login)
 
 	return r
 }

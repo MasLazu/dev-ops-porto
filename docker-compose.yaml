@@ -30,6 +30,7 @@ services:
       DB_PASSWORD: postgres
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
+      JWT_SECRET: yolelelele
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib

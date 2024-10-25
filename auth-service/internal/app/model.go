@@ -24,3 +24,12 @@ func (rur *registerUserRequest) toUser() user {
 		Password: rur.Password,
 	}
 }
+
+type loginUserRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type loginResponse struct {
+	AccessToken string `json:"access_token"`
+}

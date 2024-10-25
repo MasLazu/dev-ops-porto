@@ -69,7 +69,7 @@ func Run(ctx context.Context) error {
 	validator := util.NewValidator(tracer)
 	handlerTracer := util.NewHandlerTracer(tracer)
 	repository := app.NewRepository(db)
-	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, repository)
+	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, repository, config.jwtSecret)
 	server := NewServer(config, db, responseWriter, handlerTracer, handler)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", config.port), server.setupRoutes())
