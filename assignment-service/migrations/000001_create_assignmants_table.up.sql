@@ -1,0 +1,11 @@
+CREATE TABLE assignments (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    note TEXT,
+    due_date TIMESTAMP,
+    is_completed BOOLEAN DEFAULT FALSE,
+    is_important BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
