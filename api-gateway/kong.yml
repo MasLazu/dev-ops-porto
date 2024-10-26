@@ -1,0 +1,32 @@
+_format_version: "3.0"
+
+services:
+  - name: auth-service
+    url: http://auth-service:80
+    routes:
+      - name: auth-service
+        paths:
+          - /auth
+    plugins:
+      - name: opentelemetry
+        config:
+          endpoint: http://otel-collector:4318/v1/traces
+          resource_attributes:
+            service.name: kong-gateway
+            service.version: "3.5"
+          sampling_rate: 1.0
+
+  - name: assignment-service
+    url: http://assignment-service:80
+    routes:
+      - name: assignment-service
+        paths:
+          - /assignment
+    plugins:
+      - name: opentelemetry
+        config:
+          endpoint: http://otel-collector:4318/v1/traces
+          resource_attributes:
+            service.name: kong-gateway
+            service.version: "3.5"
+          sampling_rate: 1.0

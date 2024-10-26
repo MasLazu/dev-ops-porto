@@ -1,31 +1,56 @@
 services:
-  psql:
+  postgres-auth-service:
     image: postgres:latest
     restart: unless-stopped
     environment:
       POSTGRES_DB: auth_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - 5432:5432
-    volumes:
-      - psql_volume:/var/lib/postgresql/data
+    # volumes:
+    #   - postgres-auth-service_volume:/var/lib/postgresql/data
 
   auth-service:
     build:
       context: ./auth-service
     restart: unless-stopped
-    ports:
-      - 8080:80
     depends_on:
-      - psql
+      - postgres-auth-service
       - otel-collector
     environment:
       PORT: 80
       APP_ENV: local
-      DB_HOST: psql
+      DB_HOST: postgres-auth-service
       DB_PORT: 5432
       DB_DATABASE: auth_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SCHEMA: public
+      OTLP_DOMAIN: otel-collector:4317
+      JWT_SECRET: yolelelele
+
+  postgres-assignment-service:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: assignment_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    # volumes:
+    #   - postgres-assignment-service_volume:/var/lib/postgresql/data
+
+  assignment-service:
+    build:
+      context: ./assignment-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-assignment-service
+      - otel-collector
+    environment:
+      PORT: 80
+      APP_ENV: local
+      DB_HOST: postgres-assignment-service
+      DB_PORT: 5432
+      DB_DATABASE: assignment_service
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_SCHEMA: public
@@ -36,14 +61,6 @@ services:
     image: otel/opentelemetry-collector-contrib
     volumes:
       - ./otel-collector/config.yaml:/etc/otel/config.yaml
-    # ports:
-    #   - 1888:1888 # pprof extension
-    #   - 8888:8888 # Prometheus metrics exposed by the Collector
-    #   - 8889:8889 # Prometheus exporter metrics
-    #   - 13133:13133 # health_check extension
-    #   - 4317:4317 # OTLP gRPC receiver
-    #   - 4318:4318 # OTLP http receiver
-    #   - 55679:55679 # zpages extension
     command: ["--config=/etc/otel/config.yaml"]
   
   jaeger:
@@ -51,10 +68,29 @@ services:
     container_name: jaeger
     environment:
       COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    restart: unless-stopped
     ports:
-      - 16686:16686
+      - "16686:16686"
+
+  kong:
+    image: kong:latest
+    environment:
+      KONG_DATABASE: "off"
+      KONG_PORTAL: "off"
+      KONG_DECLARATIVE_CONFIG: "/kong/kong.yml"
+      KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
+      KONG_TRACING_INSTRUMENTATIONS: "all"
+      KONG_PLUGINS: "opentelemetry"
+      KONG_TRACING: "on"
+      KONG_TRACING_SAMPLING_RATE: "1.0"
+    volumes:
+      - ./api-gateway:/kong
+    ports:
+      - 8000:8000
     restart: unless-stopped
 
 volumes:
-  psql_volume:
+  # postgres-auth-service_volume:
+  # postgres-assignment-service_volume:
   otel-collector:
