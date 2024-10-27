@@ -41,7 +41,7 @@ func NewHandler(
 	}
 }
 
-func (h *Handler) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.handlerTracer.TraceHttpHandler(r, "HealthCheckHandler")
 	defer span.End()
 
@@ -51,7 +51,7 @@ func (h *Handler) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Register")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "RegisterHandler")
 	defer span.End()
 
 	var req registerUserRequest
@@ -81,7 +81,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.repository.InsertUser(ctx, req.toUser())
 	if err != nil {
-		h.responseWriter.WriteErrorResponse(ctx, w, http.StatusInternalServerError, "internal server error")
+		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Login")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "LoginHandler")
 	defer span.End()
 
 	var req loginUserRequest
@@ -124,7 +124,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	_, tokenSpan := h.tracer.Start(ctx, "generating jwt token")
 	claims := &jwt.RegisteredClaims{
 		Subject:   user.ID,
-		ExpiresAt: jwt.NewNumericDate(time.Unix(60*60*24*365, 0)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30 * 12)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

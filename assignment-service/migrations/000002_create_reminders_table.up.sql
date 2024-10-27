@@ -1,7 +1,7 @@
 CREATE TABLE reminders (
     id SERIAL PRIMARY KEY,
-    assignamet_id INTEGER NOT NULL REFERENCES assignments (id),
-    date TIMESTAMP NOT NULL,
+    assignment_id INTEGER NOT NULL REFERENCES assignments (id),
+    date TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

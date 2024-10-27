@@ -32,7 +32,7 @@ func (r *Repository) FindUserByEmail(ctx context.Context, email string) (user, e
 	var profilePicture sql.NullString
 	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.Coin, &profilePicture, &u.CreatedAt, &u.UpdatedAt, &u.Password)
 	if err != nil {
-		return user{}, err
+		return u, err
 	}
 
 	if profilePicture.Valid {

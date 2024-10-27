@@ -91,7 +91,7 @@ func newTraceProvider(ctx context.Context, otlpDomain string) (*trace.TracerProv
 		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("auth-service"),
+			semconv.ServiceNameKey.String("assignment-service"),
 		)),
 	)
 	return traceProvider, nil

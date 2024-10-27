@@ -6,8 +6,8 @@ services:
       POSTGRES_DB: auth_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    # volumes:
-    #   - postgres-auth-service_volume:/var/lib/postgresql/data
+    volumes:
+      - postgres-auth-service_volume:/var/lib/postgresql/data
 
   auth-service:
     build:
@@ -35,6 +35,8 @@ services:
       POSTGRES_DB: assignment_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
     # volumes:
     #   - postgres-assignment-service_volume:/var/lib/postgresql/data
 
@@ -91,6 +93,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  # postgres-auth-service_volume:
+  postgres-auth-service_volume:
   # postgres-assignment-service_volume:
-  otel-collector:
+  # otel-collector:

@@ -15,7 +15,7 @@ type ResponseWriter struct {
 
 type response struct {
 	Status  int         `json:"status"`
-	Suceess bool        `json:"success"`
+	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 }
@@ -24,8 +24,8 @@ func NewResponseWriter(tracer trace.Tracer) *ResponseWriter {
 	return &ResponseWriter{tracer: tracer}
 }
 
-func (rw *ResponseWriter) WriteInternalServerErrorResponse(ctx context.Context, w http.ResponseWriter, error error) {
-	rw.WriteErrorResponse(ctx, w, http.StatusInternalServerError, "internal server error")
+func (rw *ResponseWriter) WriteNotFoundResponse(ctx context.Context, w http.ResponseWriter) {
+	rw.WriteErrorResponse(ctx, w, http.StatusNotFound, "not found")
 }
 
 func (rw *ResponseWriter) WriteUnauthorizedResponse(ctx context.Context, w http.ResponseWriter) {
@@ -49,32 +49,45 @@ func (rw *ResponseWriter) WriteErrorResponse(ctx context.Context, w http.Respons
 }
 
 func (rw *ResponseWriter) WriteJSONResponse(ctx context.Context, w http.ResponseWriter, statusCode int, message string, data any) {
-	_, span := rw.tracer.Start(ctx, "writing response")
-	defer span.End()
+	rw.writeJSONResponse(ctx, w, statusCode, message, data)
+}
 
-	w.Header().Set("Content-Type", "application/json")
+func (rw *ResponseWriter) writeJSONResponse(ctx context.Context, w http.ResponseWriter, statusCode int, message string, data any) {
+	ctx, span := rw.tracer.Start(ctx, "writing response")
+	defer span.End()
 
 	response := response{
 		Status:  statusCode,
-		Suceess: statusCode >= 200 && statusCode < 300,
+		Success: statusCode >= 200 && statusCode < 300,
 		Message: message,
 		Data:    data,
 	}
 
 	jsonBytes, err := json.Marshal(response)
 	if err != nil {
-		response := `{"status": 500, "success": false, "message": "internal server error"}`
-		w.WriteHeader(http.StatusInternalServerError)
-		span.SetAttributes(attribute.Int("status_code", http.StatusInternalServerError))
-		span.SetAttributes(attribute.String("error.message", err.Error()))
-		span.SetAttributes(attribute.String("data", response))
-		w.Write([]byte(response))
+		rw.WriteInternalServerErrorResponse(ctx, w, err)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	span.SetAttributes(attribute.Int("status_code", statusCode))
 	span.SetAttributes(attribute.String("data", string(jsonBytes)))
 
 	w.WriteHeader(statusCode)
 	w.Write(jsonBytes)
+}
+
+func (rw *ResponseWriter) WriteInternalServerErrorResponse(ctx context.Context, w http.ResponseWriter, err error) {
+	_, span := rw.tracer.Start(ctx, "writing internal server error response")
+	defer span.End()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	response := `{"status": 500, "success": false, "message": "internal server error"}`
+	span.SetAttributes(attribute.String("internalError.message", err.Error()))
+
+	span.SetAttributes(attribute.Int("status_code", http.StatusInternalServerError))
+	span.SetAttributes(attribute.String("data", response))
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(response))
 }

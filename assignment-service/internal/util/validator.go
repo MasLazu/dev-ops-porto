@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"go.opentelemetry.io/otel/trace"
@@ -18,7 +19,9 @@ type Validator struct {
 }
 
 func NewValidator(tracer trace.Tracer) *Validator {
-	return &Validator{validate: validator.New(), tracer: tracer}
+	validator := validator.New()
+	validator.RegisterValidation("future", futureDate)
+	return &Validator{validate: validator, tracer: tracer}
 }
 
 func (v *Validator) Validate(ctx context.Context, data interface{}) *validationError {
@@ -38,6 +41,13 @@ func (v *Validator) Validate(ctx context.Context, data interface{}) *validationE
 	return nil
 }
 
+func futureDate(fl validator.FieldLevel) bool {
+	if date, ok := fl.Field().Interface().(time.Time); ok {
+		return date.After(time.Now())
+	}
+	return false
+}
+
 func getErrorMessage(err validator.FieldError) string {
 	switch err.Tag() {
 	case "required":
@@ -46,6 +56,8 @@ func getErrorMessage(err validator.FieldError) string {
 		return fmt.Sprintf("The %s field must be a valid email", err.Field())
 	case "gte":
 		return fmt.Sprintf("The %s field must be greater than or equal to %s", err.Field(), err.Param())
+	case "future":
+		return fmt.Sprintf("The %s field must be a future date", err.Field())
 	default:
 		return fmt.Sprintf("The %s field is invalid", err.Field())
 	}

@@ -14,7 +14,7 @@ func (s *Server) setupRoutes() http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(otelchi.Middleware("auth-service", otelchi.WithChiRoutes(r)))
 
-	r.Get("/health", s.handler.HealthCheckHandler)
+	r.Get("/health", s.handler.HealthCheck)
 	r.Post("/register", s.handler.Register)
 	r.Post("/login", s.handler.Login)
 

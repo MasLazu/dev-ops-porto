@@ -20,6 +20,7 @@ type Server struct {
 	handlerTracer  *util.HandlerTracer
 	handler        *app.Handler
 	responseWriter *util.ResponseWriter
+	authMiddleware *authMiddleware
 }
 
 func NewServer(
@@ -28,6 +29,7 @@ func NewServer(
 	responseWriter *util.ResponseWriter,
 	handlerTracer *util.HandlerTracer,
 	handler *app.Handler,
+	authauthMiddleware *authMiddleware,
 ) *Server {
 	return &Server{
 		db:             db,
@@ -35,6 +37,7 @@ func NewServer(
 		responseWriter: responseWriter,
 		handlerTracer:  handlerTracer,
 		handler:        handler,
+		authMiddleware: authauthMiddleware,
 	}
 }
 
@@ -63,14 +66,17 @@ func Run(ctx context.Context) error {
 		err = errors.Join(err, otelShutdown(ctx))
 	}()
 
-	tracer := otel.Tracer("auth-service")
+	tracer := otel.Tracer("assignment-service")
 	responseWriter := util.NewResponseWriter(tracer)
 	requestDecoder := util.NewRequestBodyDecoder(tracer)
 	validator := util.NewValidator(tracer)
 	handlerTracer := util.NewHandlerTracer(tracer)
 	repository := app.NewRepository(db)
-	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, repository)
-	server := NewServer(config, db, responseWriter, handlerTracer, handler)
+	assignmentRepository := app.NewAssignmentRepository(db)
+	reminderRepository := app.NewReminderRepository(db)
+	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, repository, assignmentRepository, reminderRepository)
+	authMiddleware := NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
+	server := NewServer(config, db, responseWriter, handlerTracer, handler, authMiddleware)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", config.port), server.setupRoutes())
 

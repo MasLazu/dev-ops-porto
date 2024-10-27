@@ -3,7 +3,7 @@ CREATE TABLE assignments (
     user_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     note TEXT,
-    due_date TIMESTAMP,
+    due_date TIMESTAMPTZ,
     is_completed BOOLEAN DEFAULT FALSE,
     is_important BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
