@@ -1,0 +1,37 @@
+auth_enabled: false # Disable authentication for simplicity
+
+server:
+  http_listen_port: 3200 # HTTP port
+
+distributor:
+  receivers:
+    jaeger: # Enable Jaeger receiver
+      protocols:
+        grpc:
+        thrift_binary:
+        thrift_compact:
+        thrift_http:
+    otlp: # Enable OpenTelemetry receiver
+      protocols:
+        grpc:
+        http:
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/lib/tempo/traces # Store traces on disk
+
+compactor:
+  compaction:
+    compacted_block_retention: 48h
+
+overrides:
+  max_traces_per_user: 0 # No limit
