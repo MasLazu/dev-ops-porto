@@ -29,7 +29,7 @@ func (rw *ResponseWriter) WriteUnauthorizedResponse(ctx context.Context, w http.
 }
 
 func (rw *ResponseWriter) WriteValidationErrorResponse(ctx context.Context, w http.ResponseWriter, err validationError) {
-	rw.WriteJSONResponse(ctx, w, http.StatusBadRequest, "validation error", err.errors)
+	rw.WriteJSONResponse(ctx, w, http.StatusUnprocessableEntity, "validation error", err.errors)
 }
 
 func (rw *ResponseWriter) WriteBadRequestResponse(ctx context.Context, w http.ResponseWriter) {

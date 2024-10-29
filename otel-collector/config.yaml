@@ -11,11 +11,7 @@ receivers:
         - job_name: "cadvisor"
           scrape_interval: 10s
           static_configs:
-            - targets: ["0.0.0.0:8181"]
-    target_allocator:
-      endpoint: http://cadvisor:8080
-      interval: 10s
-      collector_id: "otel-collector"
+            - targets: ["cadvisor:8080"]
 
 processors:
   batch:
@@ -26,10 +22,6 @@ processors:
     limit_percentage: 80
 
 exporters:
-  # zipkin:
-  #   endpoint: http://jaeger:9411/api/v2/spans
-  #   tls:
-  #     insecure: true
   prometheus:
     endpoint: 0.0.0.0:8181
   otlp:
@@ -44,7 +36,6 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch, memory_limiter]
-      # exporters: [zipkin]
       exporters: [otlp]
 
     metrics:
