@@ -1,10 +1,11 @@
 package main
 
 import (
-	"assignment-service/internal/server"
 	"context"
 	"log"
 	"os"
+
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/server"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module mission-service
+module github.com/MasLazu/dev-ops-porto/mission-service
 
 go 1.23.2
 

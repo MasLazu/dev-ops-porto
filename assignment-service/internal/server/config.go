@@ -1,10 +1,11 @@
 package server
 
 import (
-	"assignment-service/internal/database"
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/database"
 )
 
 type config struct {

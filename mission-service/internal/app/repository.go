@@ -3,7 +3,8 @@ package app
 import (
 	"context"
 	"database/sql"
-	"mission-service/internal/database"
+
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/database"
 )
 
 type Repository struct {

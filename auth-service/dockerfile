@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o auth-service ./cmd/rest-api
+RUN go build -o auth-service ./cmd
 
 FROM alpine:latest
 

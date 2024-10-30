@@ -1,15 +1,16 @@
 package server
 
 import (
-	"assignment-service/internal/app"
-	"assignment-service/internal/database"
-	"assignment-service/internal/util"
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/app"
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/util"
 
 	"go.opentelemetry.io/otel"
 )

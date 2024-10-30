@@ -1,10 +1,11 @@
 package server
 
 import (
-	"auth-service/internal/database"
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/database"
 )
 
 type config struct {

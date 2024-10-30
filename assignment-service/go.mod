@@ -1,4 +1,4 @@
-module assignment-service
+module github.com/MasLazu/dev-ops-porto/assignment-service
 
 go 1.22.2
 

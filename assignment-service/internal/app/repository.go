@@ -1,9 +1,10 @@
 package app
 
 import (
-	"assignment-service/internal/database"
 	"context"
 	"database/sql"
+
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/database"
 )
 
 type Repository struct {

@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mission-service/internal/app"
-	"mission-service/internal/database"
-	"mission-service/internal/util"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/app"
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/util"
 
 	"go.opentelemetry.io/otel"
 )

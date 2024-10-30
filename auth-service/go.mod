@@ -1,4 +1,4 @@
-module auth-service
+module github.com/MasLazu/dev-ops-porto/auth-service
 
 go 1.22.2
 

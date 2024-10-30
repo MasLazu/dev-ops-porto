@@ -2,9 +2,10 @@ package server
 
 import (
 	"fmt"
-	"mission-service/internal/database"
 	"os"
 	"strconv"
+
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/database"
 )
 
 type config struct {

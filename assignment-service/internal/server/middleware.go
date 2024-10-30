@@ -1,10 +1,11 @@
 package server
 
 import (
-	"assignment-service/internal/util"
 	"context"
 	"net/http"
 	"strings"
+
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/util"
 
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/attribute"

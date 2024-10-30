@@ -1,8 +1,9 @@
 package app
 
 import (
-	"mission-service/internal/util"
 	"net/http"
+
+	"github.com/MasLazu/dev-ops-porto/mission-service/internal/util"
 
 	"go.opentelemetry.io/otel/trace"
 )

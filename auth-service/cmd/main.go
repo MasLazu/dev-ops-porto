@@ -1,10 +1,11 @@
 package main
 
 import (
-	"auth-service/internal/server"
 	"context"
 	"log"
 	"os"
+
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/server"
 )
 
 func main() {

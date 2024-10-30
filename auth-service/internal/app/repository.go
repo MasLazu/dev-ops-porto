@@ -1,9 +1,10 @@
 package app
 
 import (
-	"auth-service/internal/database"
 	"context"
 	"database/sql"
+
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/database"
 
 	"github.com/google/uuid"
 )

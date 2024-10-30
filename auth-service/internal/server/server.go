@@ -1,15 +1,16 @@
 package server
 
 import (
-	"auth-service/internal/app"
-	"auth-service/internal/database"
-	"auth-service/internal/util"
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/app"
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/util"
 
 	"go.opentelemetry.io/otel"
 )

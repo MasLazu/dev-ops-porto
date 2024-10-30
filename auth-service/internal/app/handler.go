@@ -1,10 +1,11 @@
 package app
 
 import (
-	"auth-service/internal/util"
 	"database/sql"
 	"net/http"
 	"time"
+
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/util"
 
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/trace"

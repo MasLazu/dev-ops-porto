@@ -1,11 +1,12 @@
 package app
 
 import (
-	"assignment-service/internal/database"
 	"context"
 	"database/sql"
 	"fmt"
 	"strings"
+
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/database"
 )
 
 type ReminderRepository struct {
