@@ -3,8 +3,7 @@ package app
 import (
 	"net/http"
 
-	"github.com/MasLazu/dev-ops-porto/mission-service/internal/util"
-
+	"github.com/MasLazu/dev-ops-porto/mission-service/util"
 	"go.opentelemetry.io/otel/trace"
 )
 

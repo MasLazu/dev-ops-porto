@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/MasLazu/dev-ops-porto/mission-service/internal/util"
-
+	"github.com/MasLazu/dev-ops-porto/mission-service/util"
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/attribute"
 )

@@ -10,7 +10,7 @@ import (
 
 	"github.com/MasLazu/dev-ops-porto/mission-service/internal/app"
 	"github.com/MasLazu/dev-ops-porto/mission-service/internal/database"
-	"github.com/MasLazu/dev-ops-porto/mission-service/internal/util"
+	"github.com/MasLazu/dev-ops-porto/mission-service/util"
 
 	"go.opentelemetry.io/otel"
 )
