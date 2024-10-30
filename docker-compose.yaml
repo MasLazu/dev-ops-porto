@@ -62,8 +62,8 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib
     volumes:
-      - ./otel-collector/config.yaml:/etc/otel/config.yaml
-    command: ["--config=/etc/otel/config.yaml"]
+      - ./config/otel-collector.yaml:/etc/otel/otel-collector.yaml
+    command: ["--config=/etc/otel/otel-collector.yaml"]
     # ports:
     #   - 8080:8181
     depends_on:
@@ -106,7 +106,7 @@ services:
     container_name: tempo
     volumes:
       - tempo-storage:/var/lib/tempo
-      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - ./config/tempo.yaml:/etc/tempo/tempo.yaml
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     environment:
       - LOG_LEVEL=info
@@ -117,7 +117,7 @@ services:
     image: prom/prometheus
     restart: unless-stopped
     volumes:
-      - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./config/prometheus.yml:/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
 
@@ -155,7 +155,7 @@ services:
       KONG_TRACING: "on"
       KONG_TRACING_SAMPLING_RATE: "1.0"
     volumes:
-      - ./api-gateway:/kong
+      - ./config/kong.yaml:/kong/kong.yaml
     ports:
       - 8000:8000
 
