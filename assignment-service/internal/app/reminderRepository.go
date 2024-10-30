@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/database"
 )
 
 type ReminderRepository struct {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/util"
+	"github.com/MasLazu/dev-ops-porto/pkg/util"
 
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/otel/trace"

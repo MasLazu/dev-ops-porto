@@ -9,8 +9,8 @@ import (
 	"os/signal"
 
 	"github.com/MasLazu/dev-ops-porto/auth-service/internal/app"
-	"github.com/MasLazu/dev-ops-porto/auth-service/internal/database"
-	"github.com/MasLazu/dev-ops-porto/auth-service/internal/util"
+	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/util"
 
 	"go.opentelemetry.io/otel"
 )

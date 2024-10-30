@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/MasLazu/dev-ops-porto/mission-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/database"
 )
 
 type config struct {
@@ -52,11 +52,12 @@ func getDatabaseConfig() (database.Config, error) {
 	}
 
 	return database.Config{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     port,
-		Database: os.Getenv("DB_DATABASE"),
-		Username: os.Getenv("DB_USERNAME"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Schema:   os.Getenv("DB_SCHEMA"),
+		Host:              os.Getenv("DB_HOST"),
+		Port:              port,
+		Database:          os.Getenv("DB_DATABASE"),
+		Username:          os.Getenv("DB_USERNAME"),
+		Password:          os.Getenv("DB_PASSWORD"),
+		Schema:            os.Getenv("DB_SCHEMA"),
+		MigrationLocation: "file://migrations",
 	}, nil
 }

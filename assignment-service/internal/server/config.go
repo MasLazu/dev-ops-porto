@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/database"
 )
 
 type config struct {

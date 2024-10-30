@@ -16,12 +16,13 @@ import (
 )
 
 type Config struct {
-	Host     string
-	Port     int
-	Database string
-	Username string
-	Password string
-	Schema   string
+	Host              string
+	Port              int
+	Database          string
+	Username          string
+	Password          string
+	Schema            string
+	MigrationLocation string
 }
 
 type Service struct {
@@ -39,7 +40,7 @@ func New(config Config) (*Service, error) {
 		config.Database,
 		config.Schema,
 	)
-	if err := migrateSql(connStr); err != nil {
+	if err := migrateSql(connStr, config.MigrationLocation); err != nil {
 		return nil, fmt.Errorf("failed to migrate sql: %w", err)
 	}
 
@@ -54,8 +55,8 @@ func New(config Config) (*Service, error) {
 	}, nil
 }
 
-func migrateSql(connStr string) error {
-	m, err := migrate.New("file://migrations", connStr)
+func migrateSql(connStr string, migrationLocation string) error {
+	m, err := migrate.New(migrationLocation, connStr)
 	if err != nil {
 		log.Fatal(err)
 	}

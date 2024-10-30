@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MasLazu/dev-ops-porto/auth-service/internal/util"
-
+	"github.com/MasLazu/dev-ops-porto/pkg/util"
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/crypto/bcrypt"

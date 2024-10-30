@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/MasLazu/dev-ops-porto/mission-service/internal/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/database"
 )
 
 type Repository struct {
