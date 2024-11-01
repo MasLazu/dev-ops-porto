@@ -11,13 +11,31 @@ import (
 
 func bootstrap(config config, db *database.Service) *server.HttpServer {
 	tracer := otel.Tracer(config.serviceName)
+
 	responseWriter := util.NewResponseWriter(tracer)
 	requestDecoder := util.NewRequestBodyDecoder(tracer)
 	validator := util.NewValidator(tracer)
 	handlerTracer := util.NewHandlerTracer(tracer)
+
 	repository := app.NewRepository(db)
-	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, repository)
+	userRepository := app.NewUserRepository(db)
+	userMissionRepository := app.NewUserMissionRepository(db)
+	missionRepository := app.NewMissionRepository(db)
+
+	handler := app.NewHandler(
+		tracer,
+		responseWriter,
+		requestDecoder,
+		validator,
+		handlerTracer,
+		repository,
+		userRepository,
+		userMissionRepository,
+		missionRepository,
+	)
+
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
+
 	router := NewRouter(handler, authMiddleware)
 
 	return server.NewHttpServer(server.HttpServerConfig{

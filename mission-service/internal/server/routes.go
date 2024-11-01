@@ -25,6 +25,8 @@ func (r *Router) setupRoutes(c *chi.Mux) http.Handler {
 
 	c.Group(func(c chi.Router) {
 		c.Use(r.authMiddleware.Auth)
+		c.Get("/", r.handler.GetUserMissions)
+		c.Get("/expiration", r.handler.GetUserExpirationMissionDate)
 	})
 
 	return c
