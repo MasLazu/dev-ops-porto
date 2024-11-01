@@ -3,7 +3,7 @@ module github.com/MasLazu/dev-ops-porto/mission-service
 go 1.23.2
 
 require (
-	github.com/MasLazu/dev-ops-porto/pkg v0.0.0-20241030134941-92602b834dfa
+	github.com/MasLazu/dev-ops-porto/pkg v0.1.0
 	github.com/go-chi/chi/v5 v5.1.0
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
@@ -53,5 +53,3 @@ require (
 	google.golang.org/grpc v1.67.1 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 )
-
-replace github.com/MasLazu/dev-ops-porto/pkg => ../pkg

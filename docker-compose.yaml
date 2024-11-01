@@ -6,8 +6,8 @@ services:
       POSTGRES_DB: auth_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres-auth-service_volume:/var/lib/postgresql/data
+    # volumes:
+    #   - postgres-auth-service_volume:/var/lib/postgresql/data
 
   auth-service:
     build:
@@ -35,8 +35,8 @@ services:
       POSTGRES_DB: assignment_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres-assignment-service_volume:/var/lib/postgresql/data
+    # volumes:
+    #   - postgres-assignment-service_volume:/var/lib/postgresql/data
 
   assignment-service:
     build:
@@ -64,8 +64,10 @@ services:
       POSTGRES_DB: mission_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres-mission-service_volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    # volumes:
+    #   - postgres-mission-service_volume:/var/lib/postgresql/data
 
   mission-service:
     build:
@@ -77,9 +79,9 @@ services:
     environment:
       PORT: 80
       APP_ENV: local
-      DB_HOST: postgres-assignment-service
+      DB_HOST: postgres-mission-service
       DB_PORT: 5432
-      DB_DATABASE: assignment_service
+      DB_DATABASE: mission_service
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_SCHEMA: public
@@ -187,8 +189,8 @@ services:
       - 8000:8000
 
 volumes:
-  postgres-auth-service_volume:
-  postgres-assignment-service_volume:
-  postgres-mission-service_volume:
+  # postgres-auth-service_volume:
+  # postgres-assignment-service_volume:
+  # postgres-mission-service_volume:
   grafana-storage:
   tempo-storage:

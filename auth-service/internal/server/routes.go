@@ -3,20 +3,24 @@ package server
 import (
 	"net/http"
 
+	"github.com/MasLazu/dev-ops-porto/auth-service/internal/app"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/riandyrn/otelchi"
 )
 
-func (s *Server) setupRoutes() http.Handler {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(otelchi.Middleware("auth-service", otelchi.WithChiRoutes(r)))
+type Router struct {
+	handler *app.Handler
+}
 
-	r.Get("/health", s.handler.HealthCheck)
-	r.Post("/register", s.handler.Register)
-	r.Post("/login", s.handler.Login)
+func NewRouter(handler *app.Handler) *Router {
+	return &Router{
+		handler: handler,
+	}
+}
 
-	return r
+func (r *Router) setupRoutes(c *chi.Mux) http.Handler {
+	c.Get("/health", r.handler.HealthCheck)
+	c.Post("/register", r.handler.Register)
+	c.Post("/login", r.handler.Login)
+
+	return c
 }
