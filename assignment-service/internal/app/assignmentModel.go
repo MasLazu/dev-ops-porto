@@ -19,7 +19,7 @@ type CreateAssignmentRequest struct {
 	Title       string                  `json:"title" validate:"required"`
 	Note        string                  `json:"note" validate:"required"`
 	DueDate     time.Time               `json:"due_date" validate:"required"`
-	IsImportant bool                    `json:"is_important" validate:"required"`
+	IsImportant bool                    `json:"is_important"`
 	Reminders   []CreateReminderRequest `json:"reminders,omitempty" validate:"dive"`
 }
 
@@ -44,8 +44,8 @@ type UpdateAssignmentRequest struct {
 	Title       string                  `json:"title" validate:"required"`
 	Note        string                  `json:"note" validate:"required"`
 	DueDate     time.Time               `json:"due_date" validate:"required,future"`
-	IsImportant bool                    `json:"is_important" validate:"required"`
-	IsCompleted bool                    `json:"is_completed" validate:"required"`
+	IsImportant bool                    `json:"is_important"`
+	IsCompleted bool                    `json:"is_completed"`
 	Reminders   []CreateReminderRequest `json:"reminders,omitempty" validate:"dive"`
 }
 

@@ -6,8 +6,8 @@ services:
       POSTGRES_DB: auth_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    # volumes:
-    #   - postgres-auth-service_volume:/var/lib/postgresql/data
+    volumes:
+      - postgres-auth-service_volume:/var/lib/postgresql/data
 
   auth-service:
     build:
@@ -189,7 +189,7 @@ services:
       - 8000:8000
 
 volumes:
-  # postgres-auth-service_volume:
+  postgres-auth-service_volume:
   # postgres-assignment-service_volume:
   # postgres-mission-service_volume:
   grafana-storage:
