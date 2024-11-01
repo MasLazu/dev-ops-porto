@@ -23,7 +23,9 @@ func NewRouter(handler *app.Handler, authMiddleware *middleware.AuthMiddleware) 
 func (r *Router) setupRoutes(c *chi.Mux) http.Handler {
 	c.Get("/health", r.handler.HealthCheck)
 
-	// c.Use(r.authMiddleware.Auth)
+	c.Group(func(c chi.Router) {
+		c.Use(r.authMiddleware.Auth)
+	})
 
 	return c
 }
