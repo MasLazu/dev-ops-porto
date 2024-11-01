@@ -18,7 +18,12 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func SetupOTelSDK(ctx context.Context, otlpDomain string) (shutdown func(context.Context) error, err error) {
+type Config struct {
+	otlpDomain  string
+	serviceName string
+}
+
+func SetupOTelSDK(ctx context.Context, config Config) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
@@ -43,7 +48,7 @@ func SetupOTelSDK(ctx context.Context, otlpDomain string) (shutdown func(context
 	otel.SetTextMapPropagator(prop)
 
 	// Set up trace provider.
-	tracerProvider, err := newTraceProvider(ctx, otlpDomain)
+	tracerProvider, err := newTraceProvider(ctx, config)
 	if err != nil {
 		handleErr(err)
 		return
@@ -52,7 +57,7 @@ func SetupOTelSDK(ctx context.Context, otlpDomain string) (shutdown func(context
 	otel.SetTracerProvider(tracerProvider)
 
 	// Set up meter provider.
-	meterProvider, err := newMeterProvider(ctx, otlpDomain)
+	meterProvider, err := newMeterProvider(ctx, config.otlpDomain)
 	if err != nil {
 		handleErr(err)
 		return
@@ -79,8 +84,8 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTraceProvider(ctx context.Context, otlpDomain string) (*trace.TracerProvider, error) {
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure(), otlptracegrpc.WithEndpoint(otlpDomain))
+func newTraceProvider(ctx context.Context, config Config) (*trace.TracerProvider, error) {
+	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure(), otlptracegrpc.WithEndpoint(config.otlpDomain))
 	// traceExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		return nil, err
@@ -91,7 +96,7 @@ func newTraceProvider(ctx context.Context, otlpDomain string) (*trace.TracerProv
 		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("assignment-service"),
+			semconv.ServiceNameKey.String(config.serviceName),
 		)),
 	)
 	return traceProvider, nil

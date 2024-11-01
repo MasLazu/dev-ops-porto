@@ -21,9 +21,9 @@ func NewRouter(handler *app.Handler, authMiddleware *middleware.AuthMiddleware) 
 }
 
 func (r *Router) setupRoutes(c *chi.Mux) http.Handler {
-	c.Use(r.authMiddleware.Auth)
-
 	c.Get("/health", r.handler.HealthCheck)
+
+	c.Use(r.authMiddleware.Auth)
 
 	c.Post("/", r.handler.CreateAssignment)
 	c.Get("/", r.handler.GetAssignments)

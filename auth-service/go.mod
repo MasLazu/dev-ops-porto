@@ -53,5 +53,3 @@ require (
 	google.golang.org/grpc v1.67.1 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 )
-
-replace github.com/MasLazu/dev-ops-porto/pkg => ../pkg

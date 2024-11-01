@@ -26,5 +26,4 @@ func bootstrap(config config, db *database.Service) *server.HttpServer {
 		Port:        config.port,
 		ServiceName: config.serviceName,
 	}, router.setupRoutes, handlerTracer, responseWriter)
-
 }
