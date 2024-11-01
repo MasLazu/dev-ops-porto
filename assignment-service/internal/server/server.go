@@ -27,7 +27,10 @@ func Run(ctx context.Context) error {
 		err = errors.Join(err, db.Close())
 	}()
 
-	otelShutdown, err := monitoring.SetupOTelSDK(ctx, config.otlpDomain)
+	otelShutdown, err := monitoring.SetupOTelSDK(ctx, monitoring.Config{
+		ServiceName: config.serviceName,
+		OtlpDomain:  config.otlpDomain,
+	})
 	if err != nil {
 		return err
 	}
