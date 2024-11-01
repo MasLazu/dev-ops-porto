@@ -30,3 +30,18 @@ services:
             service.name: kong-gateway
             service.version: "3.5"
           sampling_rate: 1.0
+
+  - name: mission-service
+    url: http://mission-service:80
+    routes:
+      - name: mission-service
+        paths:
+          - /mission
+    plugins:
+      - name: opentelemetry
+        config:
+          endpoint: http://otel-collector:4318/v1/traces
+          resource_attributes:
+            service.name: kong-gateway
+            service.version: "3.5"
+          sampling_rate: 1.0

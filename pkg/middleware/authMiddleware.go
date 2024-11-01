@@ -1,4 +1,4 @@
-package server
+package middleware
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 )
 
-type authMiddleware struct {
+type AuthMiddleware struct {
 	responseWriter *util.ResponseWriter
 	handlerTracer  *util.HandlerTracer
 	jwtSecret      []byte
@@ -20,15 +20,15 @@ func NewAuthMiddleware(
 	jwtSecret []byte,
 	responseWriter *util.ResponseWriter,
 	handlerTracer *util.HandlerTracer,
-) *authMiddleware {
-	return &authMiddleware{
+) *AuthMiddleware {
+	return &AuthMiddleware{
 		jwtSecret:      jwtSecret,
 		responseWriter: responseWriter,
 		handlerTracer:  handlerTracer,
 	}
 }
 
-func (m *authMiddleware) Auth(next http.Handler) http.Handler {
+func (m *AuthMiddleware) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx, span := m.handlerTracer.TraceHttpHandler(r, "AuthMiddleware")
 		defer span.End()

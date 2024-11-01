@@ -34,13 +34,6 @@ func NewHandler(
 	}
 }
 
-func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "NotFoundHandler")
-	defer span.End()
-
-	h.responseWriter.WriteNotFoundResponse(ctx, w)
-}
-
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.handlerTracer.TraceHttpHandler(r, "HealthCheckHandler")
 	defer span.End()

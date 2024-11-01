@@ -35,8 +35,6 @@ services:
       POSTGRES_DB: assignment_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - 5432:5432
     volumes:
       - postgres-assignment-service_volume:/var/lib/postgresql/data
 
@@ -46,6 +44,35 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres-assignment-service
+      - otel-collector
+    environment:
+      PORT: 80
+      APP_ENV: local
+      DB_HOST: postgres-assignment-service
+      DB_PORT: 5432
+      DB_DATABASE: assignment_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SCHEMA: public
+      OTLP_DOMAIN: otel-collector:4317
+      JWT_SECRET: yolelelele
+
+  postgres-mission-service:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mission_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-mission-service_volume:/var/lib/postgresql/data
+
+  mission-service:
+    build:
+      context: ./mission-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-mission-service
       - otel-collector
     environment:
       PORT: 80
@@ -162,5 +189,6 @@ services:
 volumes:
   postgres-auth-service_volume:
   postgres-assignment-service_volume:
+  postgres-mission-service_volume:
   grafana-storage:
   tempo-storage:

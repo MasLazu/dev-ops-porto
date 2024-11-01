@@ -1,4 +1,4 @@
-package server
+package monitoring
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func setupOTelSDK(ctx context.Context, otlpDomain string) (shutdown func(context.Context) error, err error) {
+func SetupOTelSDK(ctx context.Context, otlpDomain string) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
