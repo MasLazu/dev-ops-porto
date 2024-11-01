@@ -19,8 +19,8 @@ import (
 )
 
 type Config struct {
-	otlpDomain  string
-	serviceName string
+	OtlpDomain  string
+	ServiceName string
 }
 
 func SetupOTelSDK(ctx context.Context, config Config) (shutdown func(context.Context) error, err error) {
@@ -57,7 +57,7 @@ func SetupOTelSDK(ctx context.Context, config Config) (shutdown func(context.Con
 	otel.SetTracerProvider(tracerProvider)
 
 	// Set up meter provider.
-	meterProvider, err := newMeterProvider(ctx, config.otlpDomain)
+	meterProvider, err := newMeterProvider(ctx, config.OtlpDomain)
 	if err != nil {
 		handleErr(err)
 		return
@@ -85,7 +85,7 @@ func newPropagator() propagation.TextMapPropagator {
 }
 
 func newTraceProvider(ctx context.Context, config Config) (*trace.TracerProvider, error) {
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure(), otlptracegrpc.WithEndpoint(config.otlpDomain))
+	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure(), otlptracegrpc.WithEndpoint(config.OtlpDomain))
 	// traceExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func newTraceProvider(ctx context.Context, config Config) (*trace.TracerProvider
 		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(config.serviceName),
+			semconv.ServiceNameKey.String(config.ServiceName),
 		)),
 	)
 	return traceProvider, nil
