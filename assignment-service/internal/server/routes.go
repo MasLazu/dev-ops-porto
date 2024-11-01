@@ -3,25 +3,32 @@ package server
 import (
 	"net/http"
 
+	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/app"
+	"github.com/MasLazu/dev-ops-porto/pkg/middleware"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/riandyrn/otelchi"
 )
 
-func (s *Server) setupRoutes() http.Handler {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(otelchi.Middleware("assignment-service", otelchi.WithChiRoutes(r)))
-	r.Use(s.authMiddleware.Auth)
-	r.NotFound(s.handler.NotFound)
+type Router struct {
+	handler        *app.Handler
+	authMiddleware *middleware.AuthMiddleware
+}
 
-	r.Get("/health", s.handler.HealthCheck)
+func NewRouter(handler *app.Handler, authMiddleware *middleware.AuthMiddleware) *Router {
+	return &Router{
+		handler:        handler,
+		authMiddleware: authMiddleware,
+	}
+}
 
-	r.Post("/", s.handler.CreateAssignment)
-	r.Get("/", s.handler.GetAssignments)
-	r.Get("/{id}", s.handler.GetAssignmentByID)
-	r.Put("/{id}", s.handler.UpdateAssignmentByID)
+func (r *Router) setupRoutes(c *chi.Mux) http.Handler {
+	c.Use(r.authMiddleware.Auth)
 
-	return r
+	c.Get("/health", r.handler.HealthCheck)
+
+	c.Post("/", r.handler.CreateAssignment)
+	c.Get("/", r.handler.GetAssignments)
+	c.Get("/{id}", r.handler.GetAssignmentByID)
+	c.Put("/{id}", r.handler.UpdateAssignmentByID)
+
+	return c
 }
