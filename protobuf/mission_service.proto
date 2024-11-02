@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option go_package = "github.com/MasLazu/dev-ops-porto/mission-service";
+
+import "google/protobuf/any.proto";
+
+enum StatusCode {
+    STATUS_CODE_UNSPECIFIED = 0;
+    STATUS_CODE_OK = 200;
+    STATUS_CODE_CREATED = 201;
+    STATUS_CODE_ACCEPTED = 202;
+    STATUS_CODE_BAD_REQUEST = 400;
+    STATUS_CODE_UNAUTHORIZED = 401;
+    STATUS_CODE_FORBIDDEN = 403;
+    STATUS_CODE_NOT_FOUND = 404;
+    STATUS_CODE_CONFLICT = 409;
+    STATUS_CODE_INTERNAL_ERROR = 500;
+}
+
+message Error {
+    string message = 2;
+}
+
+enum TriggerMissionEvent {
+    MISSION_EVENT_UNKNOWN = 0;
+    MISSION_EVENT_CREATE_ASSIGNMENT = 1;
+    MISSION_EVENT_DONE_ASSIGNMENT = 2;
+    MISSION_EVENT_DELETE_ASSIGNMENT = 3;
+}
+
+message TriggerMissionEventResponse {
+    StatusCode status_code = 1;
+    string message = 2;
+    Error error = 3;
+}
+
+message TriggerMissionEventRequest {
+    TriggerMissionEvent event = 1;
+}
+
+
+service MissionService {
+    rpc TriggerMissionEvent(TriggerMissionEventRequest) returns (TriggerMissionEventResponse);
+}
