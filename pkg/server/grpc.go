@@ -18,20 +18,20 @@ type GrpcServerConfig struct {
 
 type GrpcServer struct {
 	config GrpcServerConfig
-	server *grpc.Server
+	Server *grpc.Server
 	logger *monitoring.Logger
 }
 
 func NewGrpcServer(config GrpcServerConfig, logger *monitoring.Logger) *GrpcServer {
 	return &GrpcServer{
 		config: config,
-		server: grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler())),
+		Server: grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler())),
 		logger: logger,
 	}
 }
 
 func (s *GrpcServer) RegisterService(sd *grpc.ServiceDesc, ss any) {
-	s.server.RegisterService(sd, ss)
+	s.Server.RegisterService(sd, ss)
 }
 
 func (s *GrpcServer) Run(ctx context.Context) (err error) {
@@ -45,10 +45,10 @@ func (s *GrpcServer) Run(ctx context.Context) (err error) {
 
 	go func() {
 		<-ctx.Done()
-		s.server.Stop()
+		s.Server.Stop()
 	}()
 
-	if err = s.server.Serve(lis); err != nil {
+	if err = s.Server.Serve(lis); err != nil {
 		s.logger.Error(ctx, fmt.Sprintf("Failed to serve GRPC server: %v", err), log.Int("port", s.config.Port))
 	}
 
