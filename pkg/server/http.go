@@ -55,6 +55,5 @@ func (s *HttpServer) HandleNotFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) Run(ctx context.Context) error {
-	http.ListenAndServe(fmt.Sprintf(":%d", s.config.Port), s.setupRoutes())
-	return nil
+	return http.ListenAndServe(fmt.Sprintf(":%d", s.config.Port), s.setupRoutes())
 }
