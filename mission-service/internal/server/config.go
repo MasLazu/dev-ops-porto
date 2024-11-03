@@ -9,7 +9,8 @@ import (
 )
 
 type config struct {
-	port        int
+	httpPort    int
+	grpcPort    int
 	otlpDomain  string
 	database    database.Config
 	serviceName string
@@ -17,7 +18,12 @@ type config struct {
 }
 
 func getConfig() (config, error) {
-	port, err := getIntEnv("PORT")
+	httpPort, err := getIntEnv("HTTP_PORT")
+	if err != nil {
+		return config{}, err
+	}
+
+	grpcPort, err := getIntEnv("GRPC_PORT")
 	if err != nil {
 		return config{}, err
 	}
@@ -28,7 +34,8 @@ func getConfig() (config, error) {
 	}
 
 	return config{
-		port:        port,
+		httpPort:    httpPort,
+		grpcPort:    grpcPort,
 		otlpDomain:  os.Getenv("OTLP_DOMAIN"),
 		jwtSecret:   []byte(os.Getenv("JWT_SECRET")),
 		serviceName: "mission-service",
