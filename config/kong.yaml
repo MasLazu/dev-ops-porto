@@ -12,7 +12,7 @@ services:
         config:
           endpoint: http://otel-collector:4318/v1/traces
           resource_attributes:
-            service.name: kong-gateway
+            service.name: auth-service
             service.version: "3.5"
           sampling_rate: 1.0
 
@@ -27,7 +27,7 @@ services:
         config:
           endpoint: http://otel-collector:4318/v1/traces
           resource_attributes:
-            service.name: kong-gateway
+            service.name: assignment-service
             service.version: "3.5"
           sampling_rate: 1.0
 
@@ -42,6 +42,6 @@ services:
         config:
           endpoint: http://otel-collector:4318/v1/traces
           resource_attributes:
-            service.name: kong-gateway
+            service.name: mission-service
             service.version: "3.5"
           sampling_rate: 1.0
