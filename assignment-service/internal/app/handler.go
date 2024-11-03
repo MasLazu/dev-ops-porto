@@ -45,14 +45,14 @@ func NewHandler(
 }
 
 func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "NotFoundHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.NotFound")
 	defer span.End()
 
 	h.responseWriter.WriteNotFoundResponse(ctx, w)
 }
 
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "HealthCheckHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.HealthCheck")
 	defer span.End()
 
 	response := h.repository.Health(ctx)
@@ -61,7 +61,7 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateAssignment(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "CreateAssignmentHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.CreateAssignment")
 	defer span.End()
 
 	userID, err := util.GetUserIDFromContext(ctx)
@@ -118,7 +118,7 @@ func (h *Handler) CreateAssignment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAssignments(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "GetAssignmentsHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.GetAssignments")
 	defer span.End()
 
 	userID, err := util.GetUserIDFromContext(ctx)
@@ -137,7 +137,7 @@ func (h *Handler) GetAssignments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAssignmentByID(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "GetAssignmentByIDHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.GetAssignmentByID")
 	defer span.End()
 
 	userID, err := util.GetUserIDFromContext(ctx)
@@ -170,7 +170,7 @@ func (h *Handler) GetAssignmentByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteAssignmentByID(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "DeleteAssignmentByIDHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.DeleteAssignmentByID")
 	defer span.End()
 
 	userID, err := util.GetUserIDFromContext(ctx)
@@ -224,7 +224,7 @@ func (h *Handler) DeleteAssignmentByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateAssignmentByID(w http.ResponseWriter, r *http.Request) {
-	ctx, span := h.handlerTracer.TraceHttpHandler(r, "UpdateAssignmentByIDHandler")
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "Handler.UpdateAssignmentByID")
 	defer span.End()
 
 	userID, err := util.GetUserIDFromContext(ctx)

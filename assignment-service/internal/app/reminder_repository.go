@@ -7,17 +7,22 @@ import (
 	"strings"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ReminderRepository struct {
-	db *database.Service
+	db     *database.Service
+	tracer trace.Tracer
 }
 
-func NewReminderRepository(db *database.Service) *ReminderRepository {
-	return &ReminderRepository{db: db}
+func NewReminderRepository(db *database.Service, tracer trace.Tracer) *ReminderRepository {
+	return &ReminderRepository{db, tracer}
 }
 
 func (r *ReminderRepository) InsertReminder(ctx context.Context, reminder Reminder) (Reminder, error) {
+	ctx, span := r.tracer.Start(ctx, "ReminderRepository.InsertReminder")
+	defer span.End()
+
 	query := `
 	INSERT INTO reminders (assignment_id, date) 
 	VALUES ($1, $2)
@@ -33,6 +38,9 @@ func (r *ReminderRepository) InsertReminder(ctx context.Context, reminder Remind
 }
 
 func (r *ReminderRepository) InsertRemindersWithTransaction(ctx context.Context, tx *sql.Tx, reminders []Reminder) ([]Reminder, error) {
+	ctx, span := r.tracer.Start(ctx, "ReminderRepository.InsertRemindersWithTransaction")
+	defer span.End()
+
 	var insertedReminders []Reminder
 	if len(reminders) == 0 {
 		return insertedReminders, nil
@@ -68,6 +76,9 @@ func (r *ReminderRepository) InsertRemindersWithTransaction(ctx context.Context,
 }
 
 func (r *ReminderRepository) DeleteRemindersByAssignmentIDWithTransaction(ctx context.Context, tx *sql.Tx, assignmentID int) error {
+	ctx, span := r.tracer.Start(ctx, "ReminderRepository.DeleteRemindersByAssignmentIDWithTransaction")
+	defer span.End()
+
 	query := `
 	DELETE FROM reminders
 	WHERE assignment_id = $1
