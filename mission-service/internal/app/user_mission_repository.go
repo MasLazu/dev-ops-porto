@@ -159,12 +159,17 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDAndDecreasorEventIDJoinMi
 	empty := true
 	for rows.Next() {
 		var um UserMission
+		var eventDecreasorID sql.NullInt32
 		empty = false
 		err := rows.Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
 			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
-			&um.Mission.EventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
+			&eventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
 		if err != nil {
 			return missions, err
+		}
+
+		if eventDecreasorID.Valid {
+			um.Mission.EventDecreasorID = int(eventDecreasorID.Int32)
 		}
 
 		missions = append(missions, um)

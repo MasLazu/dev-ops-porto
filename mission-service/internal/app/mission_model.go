@@ -6,8 +6,8 @@ type Mission struct {
 	Illustration     string `json:"illustration"`
 	Goal             int    `json:"goal"`
 	Reward           int    `json:"reward"`
-	EventEncreasorID int    `json:"event_encreasor_id"`
-	EventDecreasorID int    `json:"event_decreasor_id"`
+	EventEncreasorID int    `json:"-"`
+	EventDecreasorID int    `json:"-"`
 	CreatedAt        string `json:"created_at"`
 	UpdatedAt        string `json:"updated_at"`
 }
