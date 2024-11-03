@@ -8,6 +8,8 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres-auth-service_volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
   auth-service:
     build:
@@ -35,6 +37,8 @@ services:
       POSTGRES_DB: assignment_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - 6543:5432
     # volumes:
     #   - postgres-assignment-service_volume:/var/lib/postgresql/data
 
@@ -65,7 +69,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - 5432:5432
+      - 7654:5432
     # volumes:
     #   - postgres-mission-service_volume:/var/lib/postgresql/data
 
@@ -88,6 +92,8 @@ services:
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
+    ports:
+      - 443:443
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib

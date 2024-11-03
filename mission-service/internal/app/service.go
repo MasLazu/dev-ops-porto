@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -44,32 +45,11 @@ func (s *Service) GetUserMissions(ctx context.Context, userID string) ([]Mission
 
 	missions := make([]Mission, 0)
 
-	tx, err := s.repository.BeginTransaction(ctx)
-	if err != nil {
-		tx.Rollback()
+	if _, err := s.SyncUserAndMissions(ctx, userID); err != nil {
 		return missions, err
 	}
 
-	user, err := s.createUserIfNotExists(ctx, tx, userID)
-	if err != nil {
-		tx.Rollback()
-		return missions, err
-	}
-
-	if user.ExpirationDate.Before(time.Now()) {
-		user, err = s.resetUserMissions(ctx, tx, user)
-		if err != nil {
-			tx.Rollback()
-			return missions, err
-		}
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return missions, err
-	}
-
-	missions, err = s.missionRepository.GetUserMissions(ctx, user.ID)
+	missions, err := s.missionRepository.GetUserMissions(ctx, userID)
 	if err != nil {
 		return missions, err
 	}
@@ -81,27 +61,7 @@ func (s *Service) GetUserExpirationMissionDate(ctx context.Context, userID strin
 	ctx, span := s.tracer.Start(ctx, "Service.GetUserExpirationMissionDate")
 	defer span.End()
 
-	tx, err := s.repository.BeginTransaction(ctx)
-	if err != nil {
-		tx.Rollback()
-		return time.Time{}, err
-	}
-
-	user, err := s.createUserIfNotExists(ctx, tx, userID)
-	if err != nil {
-		tx.Rollback()
-		return time.Time{}, err
-	}
-
-	if user.ExpirationDate.Before(time.Now()) {
-		user, err = s.resetUserMissions(ctx, tx, user)
-		if err != nil {
-			tx.Rollback()
-			return time.Time{}, err
-		}
-	}
-
-	err = tx.Commit()
+	user, err := s.SyncUserAndMissions(ctx, userID)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -109,7 +69,78 @@ func (s *Service) GetUserExpirationMissionDate(ctx context.Context, userID strin
 	return user.ExpirationDate, nil
 }
 
+func (s *Service) TriggerMissionEvent(ctx context.Context, userID string, triggerMissionEvent missionservice.TriggerMissionEvent) error {
+	_, span := s.tracer.Start(ctx, "Service.TriggerMissionEvent")
+	defer span.End()
+
+	if _, err := s.SyncUserAndMissions(ctx, userID); err != nil {
+		return err
+	}
+
+	encrease, err := s.userMissionRepository.GetUserMissionsByUserIDAndEncreasorEventIDJoinMission(ctx, userID, int(triggerMissionEvent))
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	decrease, err := s.userMissionRepository.GetUserMissionsByUserIDAndDecreasorEventIDJoinMission(ctx, userID, int(triggerMissionEvent))
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	userMissions := make([]UserMission, 0, len(encrease)+len(decrease))
+	for _, um := range encrease {
+		if um.Progress < um.Mission.Goal {
+			um.Progress++
+		}
+		userMissions = append(userMissions, um)
+	}
+
+	for _, um := range decrease {
+		if um.Progress > 0 {
+			um.Progress--
+		}
+		userMissions = append(userMissions, um)
+	}
+
+	return s.userMissionRepository.UpdateUserMissions(ctx, userMissions)
+}
+
+func (s *Service) SyncUserAndMissions(ctx context.Context, userID string) (User, error) {
+	_, span := s.tracer.Start(ctx, "Service.SyncUserAndMissions")
+	defer span.End()
+
+	tx, err := s.repository.BeginTransaction(ctx)
+	if err != nil {
+		tx.Rollback()
+		return User{}, err
+	}
+
+	user, err := s.createUserIfNotExists(ctx, tx, userID)
+	if err != nil {
+		tx.Rollback()
+		return User{}, err
+	}
+
+	if user.ExpirationDate.Before(time.Now()) {
+		user, err = s.resetUserMissions(ctx, tx, user)
+		if err != nil {
+			tx.Rollback()
+			return User{}, err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
 func (s *Service) createUserIfNotExists(ctx context.Context, tx *sql.Tx, userID string) (User, error) {
+	ctx, span := s.tracer.Start(ctx, "Service.createUserIfNotExists")
+	defer span.End()
+
 	user, err := s.userRepository.GetUserByID(ctx, userID)
 	if err != nil && err != sql.ErrNoRows {
 		return user, err
@@ -133,6 +164,9 @@ func (s *Service) createUserIfNotExists(ctx context.Context, tx *sql.Tx, userID 
 }
 
 func (s *Service) resetUserMissions(ctx context.Context, tx *sql.Tx, user User) (User, error) {
+	ctx, span := s.tracer.Start(ctx, "Service.resetUserMissions")
+	defer span.End()
+
 	user.ExpirationDate = time.Now().Add(missionPeriod)
 
 	user, err := s.userRepository.UpdateUserWithTransaction(ctx, tx, user)

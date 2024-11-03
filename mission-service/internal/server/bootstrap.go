@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/MasLazu/dev-ops-porto/mission-service/internal/app"
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
 	"github.com/MasLazu/dev-ops-porto/pkg/middleware"
 	"github.com/MasLazu/dev-ops-porto/pkg/monitoring"
 	"github.com/MasLazu/dev-ops-porto/pkg/server"
@@ -34,6 +35,7 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) (
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
 
 	httpHandler := NewHttpHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, service, authMiddleware)
+	GrpcHandler := NewGrpcHandler(tracer, service)
 
 	httpServer := server.NewHttpServer(server.HttpServerConfig{
 		Port:        config.httpPort,
@@ -44,6 +46,7 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) (
 		Port:        config.grpcPort,
 		ServiceName: config.serviceName,
 	}, logger)
+	missionservice.RegisterMissionServiceServer(grpcServer.Server, GrpcHandler)
 
 	return httpServer, grpcServer
 }
