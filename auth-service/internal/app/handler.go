@@ -138,3 +138,22 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, loginResponse{AccessToken: signedToken})
 }
+
+func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "MeHandler")
+	defer span.End()
+
+	userID, err := util.GetUserIDFromContext(ctx)
+	if err != nil {
+		h.responseWriter.WriteUnauthorizedResponse(ctx, w)
+		return
+	}
+
+	user, err := h.repository.FindUserByID(ctx, userID)
+	if err != nil {
+		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
+		return
+	}
+
+	h.responseWriter.WriteSuccessResponse(ctx, w, user)
+}
