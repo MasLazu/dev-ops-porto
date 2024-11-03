@@ -7,17 +7,22 @@ import (
 	"strings"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type UserMissionRepository struct {
-	db *database.Service
+	db     *database.Service
+	tracer trace.Tracer
 }
 
-func NewUserMissionRepository(db *database.Service) *UserMissionRepository {
-	return &UserMissionRepository{db: db}
+func NewUserMissionRepository(db *database.Service, tracer trace.Tracer) *UserMissionRepository {
+	return &UserMissionRepository{db, tracer}
 }
 
 func (r *UserMissionRepository) DeleteUserMissionByUserIDWithTransaction(ctx context.Context, tx *sql.Tx, userID string) error {
+	ctx, span := r.tracer.Start(ctx, "UserMissionRepository.DeleteUserMissionByUserIDWithTransaction")
+	defer span.End()
+
 	query := `
 	DELETE FROM users_missions
 	WHERE user_id = $1
@@ -29,9 +34,13 @@ func (r *UserMissionRepository) DeleteUserMissionByUserIDWithTransaction(ctx con
 }
 
 func (r *UserMissionRepository) InsertUserMissionsWithTransaction(ctx context.Context, tx *sql.Tx, userID string, missionIDs []int) error {
+	ctx, span := r.tracer.Start(ctx, "UserMissionRepository.InsertUserMissionsWithTransaction")
+	defer span.End()
+
 	var values []string
 	args := make([]interface{}, len(missionIDs)+1)
 	args[0] = userID
+
 	for i := range missionIDs {
 		values = append(values, fmt.Sprintf("($1, $%d)", i+2))
 		args[i+1] = missionIDs[i]

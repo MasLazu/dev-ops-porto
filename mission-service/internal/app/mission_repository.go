@@ -5,17 +5,22 @@ import (
 	"database/sql"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type MissionRepository struct {
-	db *database.Service
+	db     *database.Service
+	tracer trace.Tracer
 }
 
-func NewMissionRepository(db *database.Service) *MissionRepository {
-	return &MissionRepository{db: db}
+func NewMissionRepository(db *database.Service, tracer trace.Tracer) *MissionRepository {
+	return &MissionRepository{db, tracer}
 }
 
 func (r *MissionRepository) GetUserMissions(ctx context.Context, userID string) ([]Mission, error) {
+	ctx, span := r.tracer.Start(ctx, "MissionRepository.GetUserMissions")
+	defer span.End()
+
 	missions := []Mission{}
 
 	query := `
@@ -51,6 +56,9 @@ func (r *MissionRepository) GetUserMissions(ctx context.Context, userID string) 
 }
 
 func (r *MissionRepository) GetTwoRandomMissionIDs(ctx context.Context) ([]int, error) {
+	ctx, span := r.tracer.Start(ctx, "MissionRepository.GetTwoRandomMissionIDs")
+	defer span.End()
+
 	ids := []int{}
 
 	query := `

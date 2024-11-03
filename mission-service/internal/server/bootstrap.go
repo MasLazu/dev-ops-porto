@@ -20,15 +20,11 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) (
 
 	repository := app.NewRepository(db)
 	userRepository := app.NewUserRepository(db)
-	userMissionRepository := app.NewUserMissionRepository(db)
-	missionRepository := app.NewMissionRepository(db)
+	userMissionRepository := app.NewUserMissionRepository(db, tracer)
+	missionRepository := app.NewMissionRepository(db, tracer)
 
-	handler := app.NewHandler(
+	service := app.NewService(
 		tracer,
-		responseWriter,
-		requestDecoder,
-		validator,
-		handlerTracer,
 		repository,
 		userRepository,
 		userMissionRepository,
@@ -37,12 +33,12 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) (
 
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
 
-	router := NewRouter(handler, authMiddleware)
+	httpHandler := NewHttpHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, service, authMiddleware)
 
 	httpServer := server.NewHttpServer(server.HttpServerConfig{
 		Port:        config.httpPort,
 		ServiceName: config.serviceName,
-	}, router.setupRoutes, handlerTracer, responseWriter, logger)
+	}, httpHandler.SetupRoutes, handlerTracer, responseWriter, logger)
 
 	grpcServer := server.NewGrpcServer(server.GrpcServerConfig{
 		Port:        config.grpcPort,
