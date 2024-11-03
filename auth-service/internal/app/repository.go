@@ -49,6 +49,9 @@ func (r *Repository) FindUserByEmail(ctx context.Context, email string) (user, e
 }
 
 func (r *Repository) FindUserByID(ctx context.Context, userID string) (user, error) {
+	ctx, span := r.tracer.Start(ctx, "Repository.FindUserByID")
+	defer span.End()
+
 	query := `
 	SELECT id, email, name, coin, profile_picture, created_at, updated_at, password
 	FROM users 
@@ -71,6 +74,9 @@ func (r *Repository) FindUserByID(ctx context.Context, userID string) (user, err
 }
 
 func (r *Repository) InsertUser(ctx context.Context, u user) (user, error) {
+	ctx, span := r.tracer.Start(ctx, "Repository.InsertUser")
+	defer span.End()
+
 	query := `
     INSERT INTO users (id, email, name, password)
     VALUES ($1, $2, $3, $4)
