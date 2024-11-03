@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: mission_service.proto
 
-package mission_service
+package missionservice
 
 import (
 	context "context"
