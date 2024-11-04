@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
@@ -71,18 +72,36 @@ func (r *UserMissionRepository) UpdateUserMissions(
 	ctx, span := r.tracer.Start(ctx, "UserMissionRepository.UpdateUserMissionsWithTransaction")
 	defer span.End()
 
-	query := ``
-	args := make([]interface{}, len(missions)*3)
-	for i, um := range missions {
-		query += fmt.Sprintf(`
-		UPDATE users_missions
-		SET progress = $%d, claimed = $%d
-		WHERE id = $%d;`, i*3+3, i*3+2, i*3+1)
-		args[i*3] = um.ID
-		args[i*3+1] = um.Claimed
-		args[i*3+2] = um.Progress
+	if len(missions) == 0 {
+		return nil
 	}
 
+	progressCaseStatements := ``
+	claimedCaseStatements := ``
+	whereStatements := ``
+	args := make([]interface{}, len(missions)*3)
+	for i, um := range missions {
+		progressCaseStatements += fmt.Sprintf("WHEN id = $%d::integer THEN $%d::integer ", i*3+1, i*3+2)
+		claimedCaseStatements += fmt.Sprintf("WHEN id = $%d::integer THEN $%d::boolean ", i*3+1, i*3+3)
+		if i == len(missions)-1 {
+			whereStatements += fmt.Sprintf("$%d::integer", i*3+1)
+		} else {
+			whereStatements += fmt.Sprintf("$%d::integer, ", i*3+1)
+		}
+		args[i*3] = um.ID
+		args[i*3+1] = um.Progress
+		args[i*3+2] = um.Claimed
+	}
+
+	query := fmt.Sprintf(`
+	UPDATE users_missions
+	SET 
+		progress = CASE %sEND,
+		claimed = CASE %sEND
+	WHERE id IN (%s)
+	`, progressCaseStatements, claimedCaseStatements, whereStatements)
+
+	log.Printf("args: %v", args)
 	_, err := r.db.Pool.ExecContext(ctx, query, args...)
 
 	return err
