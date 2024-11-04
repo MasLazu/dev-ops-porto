@@ -25,23 +25,27 @@ func NewResponseWriter(tracer trace.Tracer) *ResponseWriter {
 }
 
 func (rw *ResponseWriter) WriteNotFoundResponse(ctx context.Context, w http.ResponseWriter) {
-	rw.WriteErrorResponse(ctx, w, http.StatusNotFound, "not found")
+	code := http.StatusNotFound
+	rw.WriteErrorResponse(ctx, w, code, http.StatusText(code))
 }
 
 func (rw *ResponseWriter) WriteUnauthorizedResponse(ctx context.Context, w http.ResponseWriter) {
-	rw.WriteErrorResponse(ctx, w, http.StatusUnauthorized, "unauthorized")
+	code := http.StatusUnauthorized
+	rw.WriteErrorResponse(ctx, w, code, http.StatusText(code))
 }
 
 func (rw *ResponseWriter) WriteValidationErrorResponse(ctx context.Context, w http.ResponseWriter, err validationError) {
-	rw.WriteJSONResponse(ctx, w, http.StatusUnprocessableEntity, "validation error", err.errors)
+	rw.WriteJSONResponse(ctx, w, http.StatusUnprocessableEntity, "Validation Error", err.errors)
 }
 
 func (rw *ResponseWriter) WriteBadRequestResponse(ctx context.Context, w http.ResponseWriter) {
-	rw.WriteErrorResponse(ctx, w, http.StatusBadRequest, "bad request")
+	code := http.StatusBadRequest
+	rw.WriteErrorResponse(ctx, w, code, http.StatusText(code))
 }
 
 func (rw *ResponseWriter) WriteSuccessResponse(ctx context.Context, w http.ResponseWriter, data any) {
-	rw.WriteJSONResponse(ctx, w, http.StatusOK, "success", data)
+	code := http.StatusOK
+	rw.WriteJSONResponse(ctx, w, code, http.StatusText(code), data)
 }
 
 func (rw *ResponseWriter) WriteErrorResponse(ctx context.Context, w http.ResponseWriter, statusCode int, message string) {
