@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-func NewGRPCClient(ctx context.Context, addr string, logger monitoring.Logger) (*grpc.ClientConn, error) {
+func NewGRPCClient(ctx context.Context, addr string, logger *monitoring.Logger) (*grpc.ClientConn, error) {
 	logger.Debug(ctx, "Connecting to gRPC server", log.String("address", addr))
 
 	resolver.SetDefaultScheme("dns")
