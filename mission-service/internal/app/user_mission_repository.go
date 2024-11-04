@@ -88,6 +88,46 @@ func (r *UserMissionRepository) UpdateUserMissions(
 	return err
 }
 
+func (r *UserMissionRepository) GetUserMissionsByUserIDJoinMission(ctx context.Context, userID string) ([]UserMission, error) {
+	ctx, span := r.tracer.Start(ctx, "UserMissionRepository.GetUserMissionsByUserIDJoinMission")
+	defer span.End()
+
+	query := `
+	SELECT um.id, um.user_id, um.mission_id, um.progress, um.claimed, um.created_at, um.updated_at,
+	m.id, m.title, m.illustration, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
+	FROM users_missions um
+	JOIN missions m ON m.id = um.mission_id
+	WHERE um.user_id = $1
+	`
+
+	userMissions := make([]UserMission, 0)
+
+	rows, err := r.db.Pool.QueryContext(ctx, query, userID)
+	if err != nil {
+		return userMissions, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var um UserMission
+		var eventDecreasorID sql.NullInt32
+		err := rows.Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
+			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
+			&eventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
+		if err != nil {
+			return userMissions, err
+		}
+
+		if eventDecreasorID.Valid {
+			um.Mission.EventDecreasorID = int(eventDecreasorID.Int32)
+		}
+
+		userMissions = append(userMissions, um)
+	}
+
+	return userMissions, nil
+}
+
 func (r *UserMissionRepository) GetUserMissionsByUserIDAndEncreasorEventIDJoinMission(
 	ctx context.Context,
 	userID string,

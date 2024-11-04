@@ -39,22 +39,22 @@ func (s *Service) HealthCheck(ctx context.Context) map[string]string {
 	return s.repository.Health(ctx)
 }
 
-func (s *Service) GetUserMissions(ctx context.Context, userID string) ([]Mission, error) {
+func (s *Service) GetUserMissions(ctx context.Context, userID string) ([]UserMission, error) {
 	ctx, span := s.tracer.Start(ctx, "Service.GetUserMissions")
 	defer span.End()
 
-	missions := make([]Mission, 0)
+	userMissions := make([]UserMission, 0)
 
 	if _, err := s.SyncUserAndMissions(ctx, userID); err != nil {
-		return missions, err
+		return userMissions, err
 	}
 
-	missions, err := s.missionRepository.GetUserMissions(ctx, userID)
+	userMissions, err := s.userMissionRepository.GetUserMissionsByUserIDJoinMission(ctx, userID)
 	if err != nil {
-		return missions, err
+		return userMissions, err
 	}
 
-	return missions, nil
+	return userMissions, nil
 }
 
 func (s *Service) GetUserExpirationMissionDate(ctx context.Context, userID string) (time.Time, error) {
