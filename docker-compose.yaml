@@ -60,6 +60,7 @@ services:
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
+      GRPC_MISSION_SERVICE_DOMAIN: mission-service:443
 
   postgres-mission-service:
     image: postgres:latest
