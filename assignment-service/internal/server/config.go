@@ -9,11 +9,12 @@ import (
 )
 
 type config struct {
-	port        int
-	otlpDomain  string
-	database    database.Config
-	serviceName string
-	jwtSecret   []byte
+	port                     int
+	otlpDomain               string
+	grpcMissionServiceDomain string
+	database                 database.Config
+	serviceName              string
+	jwtSecret                []byte
 }
 
 func getConfig() (config, error) {
@@ -28,11 +29,12 @@ func getConfig() (config, error) {
 	}
 
 	return config{
-		port:        port,
-		otlpDomain:  os.Getenv("OTLP_DOMAIN"),
-		jwtSecret:   []byte(os.Getenv("JWT_SECRET")),
-		database:    dbConfig,
-		serviceName: "assignment-service",
+		port:                     port,
+		otlpDomain:               os.Getenv("OTLP_DOMAIN"),
+		jwtSecret:                []byte(os.Getenv("JWT_SECRET")),
+		database:                 dbConfig,
+		grpcMissionServiceDomain: os.Getenv("GRPC_MISSION_SERVICE_DOMAIN"),
+		serviceName:              "assignment-service",
 	}, nil
 }
 

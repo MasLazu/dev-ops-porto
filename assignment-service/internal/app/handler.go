@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
 	"github.com/MasLazu/dev-ops-porto/pkg/util"
 
 	"github.com/go-chi/chi/v5"
@@ -20,6 +21,7 @@ type Handler struct {
 	repository           *Repository
 	assignmentRepository *AssignmentRepository
 	reminderRepository   *ReminderRepository
+	missionServiceClient missionservice.MissionServiceClient
 }
 
 func NewHandler(
@@ -31,6 +33,7 @@ func NewHandler(
 	repository *Repository,
 	assignmentRepository *AssignmentRepository,
 	reminderRepository *ReminderRepository,
+	missionServiceClient missionservice.MissionServiceClient,
 ) *Handler {
 	return &Handler{
 		tracer:               tracer,
@@ -41,6 +44,7 @@ func NewHandler(
 		assignmentRepository: assignmentRepository,
 		repository:           repository,
 		reminderRepository:   reminderRepository,
+		missionServiceClient: missionServiceClient,
 	}
 }
 
@@ -113,6 +117,19 @@ func (h *Handler) CreateAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.Commit()
+
+	_, triggerMissionEventSpan := h.tracer.Start(ctx, "Handler.CreateAssignment.TriggerMissionEvent")
+	_, err = h.missionServiceClient.TriggerMissionEvent(ctx, &missionservice.TriggerMissionEventRequest{
+		UserId: userID,
+		Event:  missionservice.TriggerMissionEvent_MISSION_EVENT_CREATE_ASSIGNMENT,
+	})
+	if err != nil {
+		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
+		triggerMissionEventSpan.RecordError(err)
+		triggerMissionEventSpan.End()
+		return
+	}
+	triggerMissionEventSpan.End()
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, assignment)
 }
@@ -219,6 +236,19 @@ func (h *Handler) DeleteAssignmentByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.Commit()
+
+	_, triggerMissionEventSpan := h.tracer.Start(ctx, "Handler.CreateAssignment.TriggerMissionEvent")
+	_, err = h.missionServiceClient.TriggerMissionEvent(ctx, &missionservice.TriggerMissionEventRequest{
+		UserId: userID,
+		Event:  missionservice.TriggerMissionEvent_MISSION_EVENT_DELETE_ASSIGNMENT,
+	})
+	if err != nil {
+		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
+		triggerMissionEventSpan.RecordError(err)
+		triggerMissionEventSpan.End()
+		return
+	}
+	triggerMissionEventSpan.End()
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, nil)
 }

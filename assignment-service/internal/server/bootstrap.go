@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/MasLazu/dev-ops-porto/assignment-service/internal/app"
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
 	"github.com/MasLazu/dev-ops-porto/pkg/middleware"
 	"github.com/MasLazu/dev-ops-porto/pkg/monitoring"
 	"github.com/MasLazu/dev-ops-porto/pkg/server"
@@ -10,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-func bootstrap(config config, db *database.Service, logger *monitoring.Logger) *server.HttpServer {
+func bootstrap(config config, db *database.Service, logger *monitoring.Logger, missionServiceClient missionservice.MissionServiceClient) *server.HttpServer {
 	tracer := otel.Tracer(config.serviceName)
 	responseWriter := util.NewResponseWriter(tracer)
 	requestDecoder := util.NewRequestBodyDecoder(tracer)
@@ -19,7 +20,8 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) *
 	repository := app.NewRepository(db)
 	assignmentRepository := app.NewAssignmentRepository(db)
 	reminderRepository := app.NewReminderRepository(db, tracer)
-	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer, repository, assignmentRepository, reminderRepository)
+	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator,
+		handlerTracer, repository, assignmentRepository, reminderRepository, missionServiceClient)
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
 	router := NewRouter(handler, authMiddleware)
 

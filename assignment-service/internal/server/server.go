@@ -8,7 +8,9 @@ import (
 	"os/signal"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
 	"github.com/MasLazu/dev-ops-porto/pkg/monitoring"
+	"github.com/MasLazu/dev-ops-porto/pkg/util"
 	"go.opentelemetry.io/otel/log"
 )
 
@@ -44,7 +46,18 @@ func Run(ctx context.Context) error {
 		err = errors.Join(err, db.Close())
 	}()
 
-	httpServer := bootstrap(config, db, logger)
+	missionServiceConn, err := util.NewGRPCClient(ctx, config.grpcMissionServiceDomain, logger)
+	if err != nil {
+		logger.Error(ctx, fmt.Sprintf("Failed to connect to gRPC server: %v", err), log.String("address", config.grpcMissionServiceDomain))
+		return err
+	}
+	defer func() {
+		err = errors.Join(err, missionServiceConn.Close())
+	}()
+
+	missionServiceClient := missionservice.NewMissionServiceClient(missionServiceConn)
+
+	httpServer := bootstrap(config, db, logger, missionServiceClient)
 
 	return httpServer.Run(ctx)
 }
