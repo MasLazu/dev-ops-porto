@@ -6,6 +6,8 @@ import (
 	"github.com/MasLazu/dev-ops-porto/mission-service/internal/app"
 	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type GrpcHandler struct {
@@ -28,21 +30,13 @@ func (h *GrpcHandler) TriggerMissionEvent(ctx context.Context, req *missionservi
 	res := &missionservice.TriggerMissionEventResponse{}
 
 	if req.Event == missionservice.TriggerMissionEvent_MISSION_EVENT_UNKNOWN {
-		res.StatusCode = missionservice.StatusCode_STATUS_CODE_NOT_FOUND
-		res.Message = "Unknown event"
-		res.Error = &missionservice.Error{Message: "Unknown event"}
-		return res, nil
+		return res, status.Error(codes.InvalidArgument, "unknown mission event")
 	}
 
 	err := h.service.TriggerMissionEvent(ctx, req.UserId, req.Event)
 	if err != nil {
-		res.StatusCode = missionservice.StatusCode_STATUS_CODE_INTERNAL_ERROR
-		res.Message = "Internal error"
-		res.Error = &missionservice.Error{Message: err.Error()}
-		return res, nil
+		return res, status.Error(codes.Internal, err.Error())
 	}
 
-	res.StatusCode = missionservice.StatusCode_STATUS_CODE_OK
-	res.Message = "Event triggered successfully"
 	return res, nil
 }
