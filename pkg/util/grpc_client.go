@@ -9,13 +9,18 @@ import (
 	"go.opentelemetry.io/otel/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/resolver"
 )
 
 func NewGRPCClient(ctx context.Context, addr string, logger monitoring.Logger) (*grpc.ClientConn, error) {
-	logger.Info(ctx, "Connecting to gRPC server", log.String("address", addr))
+	logger.Debug(ctx, "Connecting to gRPC server", log.String("address", addr))
+
+	resolver.SetDefaultScheme("dns")
+
 	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
 	)
 
 	if err != nil {
