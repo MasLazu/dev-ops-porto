@@ -20,13 +20,12 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger, m
 	repository := app.NewRepository(db)
 	assignmentRepository := app.NewAssignmentRepository(db)
 	reminderRepository := app.NewReminderRepository(db, tracer)
-	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator,
-		handlerTracer, repository, assignmentRepository, reminderRepository, missionServiceClient)
+	service := app.NewService(tracer, repository, assignmentRepository, reminderRepository, missionServiceClient)
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
-	router := NewRouter(handler, authMiddleware)
+	httpHandler := NewHttpHandler(service, authMiddleware, handlerTracer, responseWriter, requestDecoder, validator)
 
 	return server.NewHttpServer(server.HttpServerConfig{
 		Port:        config.port,
 		ServiceName: config.serviceName,
-	}, router.setupRoutes, handlerTracer, responseWriter, logger)
+	}, httpHandler.setupRoutes, handlerTracer, responseWriter, logger)
 }

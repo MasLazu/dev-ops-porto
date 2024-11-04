@@ -3,8 +3,9 @@ module github.com/MasLazu/dev-ops-porto/assignment-service
 go 1.23.2
 
 require (
-	github.com/MasLazu/dev-ops-porto/pkg v1.5.2
+	github.com/MasLazu/dev-ops-porto/pkg v1.6.0
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/pkg/errors v0.9.1
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/log v0.7.0
 	go.opentelemetry.io/otel/trace v1.31.0

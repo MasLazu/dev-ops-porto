@@ -49,6 +49,11 @@ type UpdateAssignmentRequest struct {
 	Reminders   []CreateReminderRequest `json:"reminders,omitempty" validate:"dive"`
 }
 
+type ChangeIsCompletedRequest struct {
+	ID          int  `json:"id" validate:"required"`
+	IsCompleted bool `json:"is_completed"`
+}
+
 func (uar *UpdateAssignmentRequest) toAssignment() Assignment {
 	return Assignment{
 		Title:       uar.Title,
