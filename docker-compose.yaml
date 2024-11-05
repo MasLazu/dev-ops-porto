@@ -1,4 +1,17 @@
 services:
+
+  minio:
+    image: quay.io/minio/minio:latest
+    volumes:
+      - minio-volume:/data
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: miniorootpassword
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - internal
+
   postgres-auth-service:
     image: postgres:latest
     restart: unless-stopped
@@ -7,9 +20,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - postgres-auth-service_volume:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+      - postgres-auth-service-volume:/var/lib/postgresql/data
+    networks:
+      - internal
 
   auth-service:
     build:
@@ -29,6 +42,8 @@ services:
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
+    networks:
+      - internal
 
   postgres-assignment-service:
     image: postgres:latest
@@ -37,10 +52,8 @@ services:
       POSTGRES_DB: assignment_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - 6543:5432
-    # volumes:
-    #   - postgres-assignment-service_volume:/var/lib/postgresql/data
+    volumes:
+      - postgres-assignment-service-volume:/var/lib/postgresql/data
 
   assignment-service:
     build:
@@ -61,6 +74,8 @@ services:
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
       GRPC_MISSION_SERVICE_DOMAIN: mission-service:443
+    networks:
+      - internal
 
   postgres-mission-service:
     image: postgres:latest
@@ -69,10 +84,10 @@ services:
       POSTGRES_DB: mission_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - 7654:5432
-    # volumes:
-    #   - postgres-mission-service_volume:/var/lib/postgresql/data
+    networks:
+      - internal
+    volumes:
+      - postgres-mission-service-volume:/var/lib/postgresql/data
 
   mission-service:
     build:
@@ -93,40 +108,30 @@ services:
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
-    ports:
-      - 443:443
+    networks:
+      - internal
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib
     volumes:
       - ./config/otel-collector.yaml:/etc/otel/otel-collector.yaml
     command: ["--config=/etc/otel/otel-collector.yaml"]
-    # ports:
-    #   - 8080:8181
     depends_on:
       - cadvisor
-  
-  # jaeger:
-  #   image: jaegertracing/all-in-one:1.6.0
-  #   container_name: jaeger
-  #   environment:
-  #     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-  #   restart: unless-stopped
-  #   ports:
-  #     - "16686:16686"
+    networks:
+      - internal
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - grafana-storage:/var/lib/grafana
+      - grafana-volume:/var/lib/grafana
     depends_on:
       - tempo
+    networks:
+      - internal
 
   init:
     image: &tempoImage grafana/tempo:latest
@@ -136,34 +141,35 @@ services:
       - "10001:10001"
       - "/var/tempo"
     volumes:
-      - tempo-storage:/var/tempo
+      - tempo-volume:/var/tempo
 
   tempo:
     image: *tempoImage
-    container_name: tempo
     volumes:
-      - tempo-storage:/var/lib/tempo
+      - tempo-volume:/var/lib/tempo
       - ./config/tempo.yaml:/etc/tempo/tempo.yaml
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     environment:
       - LOG_LEVEL=info
     depends_on:
       - init
+    networks:
+      - internal
 
   prometheus:
     image: prom/prometheus
     restart: unless-stopped
     volumes:
       - "./config/prometheus.yml:/etc/prometheus/prometheus.yml"
-    ports:
-      - "9090:9090"
+    networks:
+      - internal
 
   loki:
     restart: unless-stopped
     image: grafana/loki:latest
-    ports:
-      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - internal
 
   cadvisor:
     restart: unless-stopped
@@ -177,6 +183,8 @@ services:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
       - "/var/lib/docker/:/var/lib/docker:ro"
       - "/dev/disk/:/dev/disk:ro"
+    networks:
+      - internal
 
   kong:
     image: kong:latest
@@ -195,10 +203,19 @@ services:
       - ./config/kong.yaml:/kong/kong.yaml
     ports:
       - 8000:8000
+    networks:
+      - internal
 
 volumes:
-  postgres-auth-service_volume:
-  # postgres-assignment-service_volume:
-  # postgres-mission-service_volume:
-  grafana-storage:
-  tempo-storage:
+  postgres-auth-service-volume:
+  postgres-assignment-service-volume:
+  postgres-mission-service-volume:
+  grafana-volume:
+  minio-volume:
+  tempo-volume:
+  prometheus-volume:
+  loki-volume:
+
+networks:
+  internal:
+    driver: bridge
