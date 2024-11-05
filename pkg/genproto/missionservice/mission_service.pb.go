@@ -75,42 +75,6 @@ func (TriggerMissionEvent) EnumDescriptor() ([]byte, []int) {
 	return file_mission_service_proto_rawDescGZIP(), []int{0}
 }
 
-type TriggerMissionEventResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *TriggerMissionEventResponse) Reset() {
-	*x = TriggerMissionEventResponse{}
-	mi := &file_mission_service_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TriggerMissionEventResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TriggerMissionEventResponse) ProtoMessage() {}
-
-func (x *TriggerMissionEventResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mission_service_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TriggerMissionEventResponse.ProtoReflect.Descriptor instead.
-func (*TriggerMissionEventResponse) Descriptor() ([]byte, []int) {
-	return file_mission_service_proto_rawDescGZIP(), []int{0}
-}
-
 type TriggerMissionEventRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -122,7 +86,7 @@ type TriggerMissionEventRequest struct {
 
 func (x *TriggerMissionEventRequest) Reset() {
 	*x = TriggerMissionEventRequest{}
-	mi := &file_mission_service_proto_msgTypes[1]
+	mi := &file_mission_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -134,7 +98,7 @@ func (x *TriggerMissionEventRequest) String() string {
 func (*TriggerMissionEventRequest) ProtoMessage() {}
 
 func (x *TriggerMissionEventRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mission_service_proto_msgTypes[1]
+	mi := &file_mission_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -147,7 +111,7 @@ func (x *TriggerMissionEventRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TriggerMissionEventRequest.ProtoReflect.Descriptor instead.
 func (*TriggerMissionEventRequest) Descriptor() ([]byte, []int) {
-	return file_mission_service_proto_rawDescGZIP(), []int{1}
+	return file_mission_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *TriggerMissionEventRequest) GetUserId() string {
@@ -164,19 +128,55 @@ func (x *TriggerMissionEventRequest) GetEvent() TriggerMissionEvent {
 	return TriggerMissionEvent_MISSION_EVENT_UNKNOWN
 }
 
+type TriggerMissionEventResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *TriggerMissionEventResponse) Reset() {
+	*x = TriggerMissionEventResponse{}
+	mi := &file_mission_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerMissionEventResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerMissionEventResponse) ProtoMessage() {}
+
+func (x *TriggerMissionEventResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mission_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerMissionEventResponse.ProtoReflect.Descriptor instead.
+func (*TriggerMissionEventResponse) Descriptor() ([]byte, []int) {
+	return file_mission_service_proto_rawDescGZIP(), []int{1}
+}
+
 var File_mission_service_proto protoreflect.FileDescriptor
 
 var file_mission_service_proto_rawDesc = []byte{
 	0x0a, 0x15, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x1d, 0x0a, 0x1b, 0x54, 0x72, 0x69, 0x67, 0x67,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x61, 0x0a, 0x1a, 0x54, 0x72, 0x69, 0x67, 0x67,
 	0x65, 0x72, 0x4d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x61, 0x0a, 0x1a, 0x54, 0x72, 0x69, 0x67, 0x67, 0x65,
-	0x72, 0x4d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x2a, 0x0a,
-	0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e, 0x54,
-	0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x4d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x45, 0x76, 0x65,
-	0x6e, 0x74, 0x52, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x2a, 0xc2, 0x01, 0x0a, 0x13, 0x54, 0x72,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x2a,
+	0x0a, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e,
+	0x54, 0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x4d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x45, 0x76,
+	0x65, 0x6e, 0x74, 0x52, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x22, 0x1d, 0x0a, 0x1b, 0x54, 0x72,
+	0x69, 0x67, 0x67, 0x65, 0x72, 0x4d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x45, 0x76, 0x65, 0x6e,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2a, 0xc2, 0x01, 0x0a, 0x13, 0x54, 0x72,
 	0x69, 0x67, 0x67, 0x65, 0x72, 0x4d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x45, 0x76, 0x65, 0x6e,
 	0x74, 0x12, 0x19, 0x0a, 0x15, 0x4d, 0x49, 0x53, 0x53, 0x49, 0x4f, 0x4e, 0x5f, 0x45, 0x56, 0x45,
 	0x4e, 0x54, 0x5f, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x23, 0x0a, 0x1f,
@@ -217,13 +217,13 @@ var file_mission_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mission_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_mission_service_proto_goTypes = []any{
 	(TriggerMissionEvent)(0),            // 0: TriggerMissionEvent
-	(*TriggerMissionEventResponse)(nil), // 1: TriggerMissionEventResponse
-	(*TriggerMissionEventRequest)(nil),  // 2: TriggerMissionEventRequest
+	(*TriggerMissionEventRequest)(nil),  // 1: TriggerMissionEventRequest
+	(*TriggerMissionEventResponse)(nil), // 2: TriggerMissionEventResponse
 }
 var file_mission_service_proto_depIdxs = []int32{
 	0, // 0: TriggerMissionEventRequest.event:type_name -> TriggerMissionEvent
-	2, // 1: MissionService.TriggerMissionEvent:input_type -> TriggerMissionEventRequest
-	1, // 2: MissionService.TriggerMissionEvent:output_type -> TriggerMissionEventResponse
+	1, // 1: MissionService.TriggerMissionEvent:input_type -> TriggerMissionEventRequest
+	2, // 2: MissionService.TriggerMissionEvent:output_type -> TriggerMissionEventResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

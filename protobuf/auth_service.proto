@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/MasLazu/dev-ops-porto/authservice";
+
+message AddUserCoinsRequest {
+    string user_id = 1;
+    int32 coins = 2;
+}
+
+message AddUserCoinsResponse {}
+
+service MissionService {
+    rpc AddUserCoins(AddUserCoinsRequest) returns (AddUserCoinsResponse);
+}

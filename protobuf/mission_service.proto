@@ -10,13 +10,12 @@ enum TriggerMissionEvent {
     MISSION_EVENT_DELETE_ASSIGNMENT = 4;
 }
 
-message TriggerMissionEventResponse {}
-
 message TriggerMissionEventRequest {
     string user_id = 1;
     TriggerMissionEvent event = 2;
 }
 
+message TriggerMissionEventResponse {}
 
 service MissionService {
     rpc TriggerMissionEvent(TriggerMissionEventRequest) returns (TriggerMissionEventResponse);
