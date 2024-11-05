@@ -24,6 +24,24 @@ services:
     networks:
       - internal
 
+  static-service:
+    build:
+      context: ./static-service
+    restart: unless-stopped
+    depends_on:
+      - otel-collector
+    environment:
+      PORT: 80
+      APP_ENV: local
+      DB_PORT: 5432
+      OTLP_DOMAIN: otel-collector:4317
+      S3_ACCESS_KEY: root
+      S3_SECRET_KEY: miniorootpassword
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET_PROFILE_PICTURES: profile-pictures
+    networks:
+      - internal
+
   auth-service:
     build:
       context: ./auth-service
@@ -42,6 +60,11 @@ services:
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
+      S3_ACCESS_KEY: root
+      S3_SECRET_KEY: miniorootpassword
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET_PROFILE_PICTURES: profile-pictures
+      PUBLIC_STATIC_SERVICE_ENDPOINT: http://localhost:8000/static/
     networks:
       - internal
 

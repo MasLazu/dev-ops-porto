@@ -45,3 +45,18 @@ services:
             service.name: mission-service
             service.version: "3.5"
           sampling_rate: 1.0
+
+  - name: static-service
+    url: http://static-service:80
+    routes:
+      - name: static-service
+        paths:
+          - /static
+    plugins:
+      - name: opentelemetry
+        config:
+          endpoint: http://otel-collector:4318/v1/traces
+          resource_attributes:
+            service.name: static-service
+            service.version: "3.5"
+          sampling_rate: 1.0
