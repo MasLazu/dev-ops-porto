@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MissionService_AddUserCoins_FullMethodName = "/MissionService/AddUserCoins"
+	MissionService_AddUserCoins_FullMethodName    = "/MissionService/AddUserCoins"
+	MissionService_ReduceUserCoins_FullMethodName = "/MissionService/ReduceUserCoins"
 )
 
 // MissionServiceClient is the client API for MissionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MissionServiceClient interface {
-	AddUserCoins(ctx context.Context, in *AddUserCoinsRequest, opts ...grpc.CallOption) (*AddUserCoinsResponse, error)
+	AddUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	ReduceUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 }
 
 type missionServiceClient struct {
@@ -37,10 +39,20 @@ func NewMissionServiceClient(cc grpc.ClientConnInterface) MissionServiceClient {
 	return &missionServiceClient{cc}
 }
 
-func (c *missionServiceClient) AddUserCoins(ctx context.Context, in *AddUserCoinsRequest, opts ...grpc.CallOption) (*AddUserCoinsResponse, error) {
+func (c *missionServiceClient) AddUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AddUserCoinsResponse)
+	out := new(EmptyResponse)
 	err := c.cc.Invoke(ctx, MissionService_AddUserCoins_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *missionServiceClient) ReduceUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyResponse)
+	err := c.cc.Invoke(ctx, MissionService_ReduceUserCoins_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +63,8 @@ func (c *missionServiceClient) AddUserCoins(ctx context.Context, in *AddUserCoin
 // All implementations must embed UnimplementedMissionServiceServer
 // for forward compatibility.
 type MissionServiceServer interface {
-	AddUserCoins(context.Context, *AddUserCoinsRequest) (*AddUserCoinsResponse, error)
+	AddUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error)
+	ReduceUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error)
 	mustEmbedUnimplementedMissionServiceServer()
 }
 
@@ -62,8 +75,11 @@ type MissionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedMissionServiceServer struct{}
 
-func (UnimplementedMissionServiceServer) AddUserCoins(context.Context, *AddUserCoinsRequest) (*AddUserCoinsResponse, error) {
+func (UnimplementedMissionServiceServer) AddUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddUserCoins not implemented")
+}
+func (UnimplementedMissionServiceServer) ReduceUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReduceUserCoins not implemented")
 }
 func (UnimplementedMissionServiceServer) mustEmbedUnimplementedMissionServiceServer() {}
 func (UnimplementedMissionServiceServer) testEmbeddedByValue()                        {}
@@ -87,7 +103,7 @@ func RegisterMissionServiceServer(s grpc.ServiceRegistrar, srv MissionServiceSer
 }
 
 func _MissionService_AddUserCoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddUserCoinsRequest)
+	in := new(UserCoinsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -99,7 +115,25 @@ func _MissionService_AddUserCoins_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: MissionService_AddUserCoins_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MissionServiceServer).AddUserCoins(ctx, req.(*AddUserCoinsRequest))
+		return srv.(MissionServiceServer).AddUserCoins(ctx, req.(*UserCoinsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MissionService_ReduceUserCoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserCoinsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MissionServiceServer).ReduceUserCoins(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MissionService_ReduceUserCoins_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MissionServiceServer).ReduceUserCoins(ctx, req.(*UserCoinsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -114,6 +148,10 @@ var MissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddUserCoins",
 			Handler:    _MissionService_AddUserCoins_Handler,
+		},
+		{
+			MethodName: "ReduceUserCoins",
+			Handler:    _MissionService_ReduceUserCoins_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
