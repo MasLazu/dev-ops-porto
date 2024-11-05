@@ -200,16 +200,24 @@ func (h *Handler) ChangeProfilePicture(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	storeFileCtx, storeFileSpan := h.tracer.Start(ctx, "storing file")
+	_, gettingFileSpan := h.tracer.Start(storeFileCtx, "getting file")
 	file, _, err := r.FormFile("profile_picture")
 	if err != nil {
+		gettingFileSpan.End()
+		storeFileSpan.End()
 		h.responseWriter.WriteBadRequestResponse(ctx, w)
 		return
 	}
+	gettingFileSpan.End()
 	defer file.Close()
 
+	_, detectingContentTypeSpan := h.tracer.Start(storeFileCtx, "detecting content type")
 	buffer := make([]byte, 512)
 	_, err = file.Read(buffer)
 	if err != nil {
+		detectingContentTypeSpan.End()
+		storeFileSpan.End()
 		h.responseWriter.WriteBadRequestResponse(ctx, w)
 		return
 	}
@@ -218,10 +226,14 @@ func (h *Handler) ChangeProfilePicture(w http.ResponseWriter, r *http.Request) {
 
 	mimeType := http.DetectContentType(buffer)
 	if !strings.HasPrefix(mimeType, "image/") {
+		detectingContentTypeSpan.End()
+		storeFileSpan.End()
 		h.responseWriter.WriteErrorResponse(ctx, w, http.StatusBadRequest, "file must be an image")
 		return
 	}
+	detectingContentTypeSpan.End()
 
+	_, putFileToBucketSpan := h.tracer.Start(storeFileCtx, "putting file to bucket")
 	key := userID + "/" + "profile_picture"
 	_, err = h.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      &h.profilePicturesBucket,
@@ -230,9 +242,13 @@ func (h *Handler) ChangeProfilePicture(w http.ResponseWriter, r *http.Request) {
 		ContentType: &mimeType,
 	})
 	if err != nil {
+		putFileToBucketSpan.End()
+		storeFileSpan.End()
 		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
 		return
 	}
+	putFileToBucketSpan.End()
+	storeFileSpan.End()
 
 	user.ProfilePicture = key
 	user, err = h.repository.UpdateUser(ctx, user)
