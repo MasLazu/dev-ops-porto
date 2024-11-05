@@ -27,6 +27,8 @@ func (r *Router) setupRoutes(c *chi.Mux) http.Handler {
 	c.Group(func(c chi.Router) {
 		c.Use(r.authMiddleware.Auth)
 		c.Get("/me", r.handler.Me)
+		c.Post("/me/profile-picture", r.handler.ChangeProfilePicture)
+		c.Delete("/me/profile-picture", r.handler.DeleteProfilePicture)
 	})
 
 	return c

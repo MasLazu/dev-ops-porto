@@ -1,22 +1,42 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 )
 
-type config struct {
-	port        int
-	serviceName string
-	otlpDomain  string
-	database    database.Config
-	jwtSecret   []byte
+type bucketNames struct {
+	profilePictures string
 }
 
-func getConfig() (config, error) {
+type s3Config struct {
+	enpoint     string
+	bucketNames bucketNames
+}
+
+type AwsConfig struct {
+	awsConfig aws.Config
+	s3        s3Config
+}
+
+type config struct {
+	port                 int
+	serviceName          string
+	otlpDomain           string
+	jwtSecret            []byte
+	database             database.Config
+	aws                  AwsConfig
+	staticServiceEnpoint string
+}
+
+func getConfig(ctx context.Context) (config, error) {
 	port, err := getIntEnv("PORT")
 	if err != nil {
 		return config{}, err
@@ -27,12 +47,27 @@ func getConfig() (config, error) {
 		return config{}, fmt.Errorf("failed to get database config: %w", err)
 	}
 
+	awsConfig, err := getAwsConfig(ctx)
+	if err != nil {
+		return config{}, fmt.Errorf("failed to get S3 config: %w", err)
+	}
+
 	return config{
-		port:        port,
-		otlpDomain:  os.Getenv("OTLP_DOMAIN"),
-		jwtSecret:   []byte(os.Getenv("JWT_SECRET")),
-		serviceName: "auth-service",
-		database:    dbConfig,
+		port:                 port,
+		otlpDomain:           os.Getenv("OTLP_DOMAIN"),
+		jwtSecret:            []byte(os.Getenv("JWT_SECRET")),
+		serviceName:          "auth-service",
+		database:             dbConfig,
+		staticServiceEnpoint: os.Getenv("PUBLIC_STATIC_SERVICE_ENDPOINT"),
+		aws: AwsConfig{
+			awsConfig: awsConfig,
+			s3: s3Config{
+				enpoint: os.Getenv("S3_ENDPOINT"),
+				bucketNames: bucketNames{
+					profilePictures: os.Getenv("S3_BUCKET_PROFILE_PICTURES"),
+				},
+			},
+		},
 	}, nil
 }
 
@@ -45,6 +80,18 @@ func getIntEnv(key string) (int, error) {
 	}
 
 	return i, nil
+}
+
+func getAwsConfig(ctx context.Context) (aws.Config, error) {
+	awsCfg, err := awsconfig.LoadDefaultConfig(ctx,
+		awsconfig.WithRegion("us-west-2"),
+		awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(os.Getenv("S3_ACCESS_KEY"), os.Getenv("S3_SECRET_KEY"), "")),
+	)
+	if err != nil {
+		return aws.Config{}, fmt.Errorf("failed to load AWS config: %w", err)
+	}
+
+	return awsCfg, nil
 }
 
 func getDatabaseConfig() (database.Config, error) {

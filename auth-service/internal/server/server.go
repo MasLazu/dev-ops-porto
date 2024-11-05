@@ -16,7 +16,7 @@ func Run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	config, err := getConfig()
+	config, err := getConfig(ctx)
 	if err != nil {
 		return err
 	}
@@ -43,6 +43,7 @@ func Run(ctx context.Context) error {
 	defer func() {
 		err = errors.Join(err, db.Close())
 	}()
+	logger.Info(ctx, "Connected to database", log.String("host", config.database.Host), log.Int("port", config.database.Port))
 
 	httpServer := bootstrap(config, db, logger)
 

@@ -13,6 +13,10 @@ type user struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+func (u *user) addPrefixToProfilePictureURL(prefix string) {
+	u.ProfilePicture = prefix + u.ProfilePicture
+}
+
 type registerUserRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Name     string `json:"name" validate:"required"`
