@@ -25,12 +25,11 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) *
 	handlerTracer := util.NewHandlerTracer(tracer)
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
 	repository := app.NewRepository(db, tracer)
-	handler := app.NewHandler(tracer, responseWriter, requestDecoder, validator, handlerTracer,
-		repository, config.jwtSecret, client, config.aws.s3.bucketNames.profilePictures, config.staticServiceEnpoint)
-	router := NewRouter(handler, authMiddleware)
+	service := app.NewService(tracer, repository, config.jwtSecret, client, config.aws.s3.bucketNames.profilePictures, config.staticServiceEnpoint)
+	handler := NewHttpHandler(service, authMiddleware, tracer, responseWriter, requestDecoder, validator, handlerTracer)
 
 	return server.NewHttpServer(server.HttpServerConfig{
 		Port:        config.port,
 		ServiceName: config.serviceName,
-	}, router.setupRoutes, handlerTracer, responseWriter, logger)
+	}, handler.setupRoutes, handlerTracer, responseWriter, logger)
 }

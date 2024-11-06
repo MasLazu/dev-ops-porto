@@ -3,7 +3,7 @@ module github.com/MasLazu/dev-ops-porto/auth-service
 go 1.23.2
 
 require (
-	github.com/MasLazu/dev-ops-porto/pkg v1.4.3
+	github.com/MasLazu/dev-ops-porto/pkg v1.7.0
 	github.com/aws/aws-sdk-go-v2 v1.32.3
 	github.com/aws/aws-sdk-go-v2/config v1.28.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.42

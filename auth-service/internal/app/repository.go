@@ -42,7 +42,7 @@ func (r *Repository) FindUserByEmail(ctx context.Context, email string) (user, e
 	}
 
 	if profilePicture.Valid {
-		u.ProfilePicture = profilePicture.String
+		u.ProfilePicture = &profilePicture.String
 	}
 
 	return u, nil
@@ -67,7 +67,7 @@ func (r *Repository) FindUserByID(ctx context.Context, userID string) (user, err
 	}
 
 	if profilePicture.Valid {
-		u.ProfilePicture = profilePicture.String
+		u.ProfilePicture = &profilePicture.String
 	}
 
 	return u, nil
@@ -93,7 +93,7 @@ func (r *Repository) UpdateUser(ctx context.Context, u user) (user, error) {
 	}
 
 	if profilePicture.Valid {
-		updatedUser.ProfilePicture = profilePicture.String
+		updatedUser.ProfilePicture = &profilePicture.String
 	}
 
 	return updatedUser, nil
