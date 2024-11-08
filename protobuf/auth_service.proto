@@ -9,7 +9,7 @@ message UserCoinsRequest {
 
 message EmptyResponse {}
 
-service MissionService {
+service AuthService {
     rpc AddUserCoins(UserCoinsRequest) returns (EmptyResponse);
     rpc ReduceUserCoins(UserCoinsRequest) returns (EmptyResponse);
 }
