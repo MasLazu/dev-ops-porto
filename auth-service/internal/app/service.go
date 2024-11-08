@@ -3,15 +3,16 @@ package app
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/MasLazu/dev-ops-porto/pkg/errors"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
 type Service struct {
@@ -50,31 +51,45 @@ func (s *Service) HealthCheck(ctx context.Context) map[string]string {
 	return response
 }
 
-func (s *Service) Register(ctx context.Context, req RegisterUserRequest) (user, ServiceError) {
+func (s *Service) newError(code code.Code, internalError error) errors.ServiceError {
+	return errors.NewServiceError(code, internalError)
+}
+
+func (s *Service) newErrorWithCLientMessage(code code.Code, internalError error, clientMessage string) errors.ServiceError {
+	return errors.NewServiceErrorWithClientMessage(code, internalError, clientMessage)
+}
+
+func (s *Service) newInternalError(internalError error) errors.ServiceError {
+	return s.newError(code.Code_INTERNAL, internalError)
+}
+
+func (s *Service) Register(ctx context.Context, req RegisterUserRequest) (user, errors.ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.Register")
 	defer span.End()
 
+	var res user
+
 	if _, err := s.repository.FindUserByEmail(ctx, req.Email); err != sql.ErrNoRows {
-		return user{}, NewClientError(http.StatusConflict, errors.New("user with this email already exists"))
+		return res, s.newErrorWithCLientMessage(code.Code_ALREADY_EXISTS, err, "user already used")
 	}
 
 	_, hashSpan := s.tracer.Start(ctx, "hashing password")
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return user{}, NewInternalServiceError(err)
+		return res, s.newInternalError(err)
 	}
 	req.Password = string(hashedPassword)
 	hashSpan.End()
 
 	user, err := s.repository.InsertUser(ctx, req.toUser())
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newInternalError(err)
 	}
 
 	return user, nil
 }
 
-func (s *Service) Login(ctx context.Context, req LoginUserRequest) (LoginResponse, ServiceError) {
+func (s *Service) Login(ctx context.Context, req LoginUserRequest) (LoginResponse, errors.ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.Login")
 	defer span.End()
 
@@ -82,16 +97,16 @@ func (s *Service) Login(ctx context.Context, req LoginUserRequest) (LoginRespons
 
 	user, err := s.repository.FindUserByEmail(ctx, req.Email)
 	if err == sql.ErrNoRows {
-		return res, NewClientError(http.StatusUnauthorized, errors.New("email or password is invalid"))
+		return res, s.newErrorWithCLientMessage(code.Code_PERMISSION_DENIED, err, "email or password is incorrect")
 	}
 
 	if err != nil {
-		return res, NewInternalServiceError(err)
+		return res, s.newInternalError(err)
 	}
 
 	_, hashSpan := s.tracer.Start(ctx, "comparing password")
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return res, NewClientError(http.StatusUnauthorized, errors.New("email or password is invalid"))
+		return res, s.newErrorWithCLientMessage(code.Code_PERMISSION_DENIED, err, "email or password is incorrect")
 	}
 	hashSpan.End()
 
@@ -106,20 +121,20 @@ func (s *Service) Login(ctx context.Context, req LoginUserRequest) (LoginRespons
 	signedToken, err := token.SignedString([]byte(s.jwtSecret))
 	if err != nil {
 		tokenSpan.End()
-		return res, NewInternalServiceError(err)
+		return res, s.newInternalError(err)
 	}
 	tokenSpan.End()
 
 	return LoginResponse{AccessToken: signedToken}, nil
 }
 
-func (s *Service) Me(ctx context.Context, userID string) (user, ServiceError) {
+func (s *Service) Me(ctx context.Context, userID string) (user, errors.ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.Me")
 	defer span.End()
 
 	user, err := s.repository.FindUserByID(ctx, userID)
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newError(code.Code_PERMISSION_DENIED, err)
 	}
 
 	user.addPrefixToProfilePictureURL(s.staticServiceEnpoint)
@@ -127,13 +142,13 @@ func (s *Service) Me(ctx context.Context, userID string) (user, ServiceError) {
 	return user, nil
 }
 
-func (s *Service) ChangeProfilePicture(ctx context.Context, userID string, file []byte) (user, ServiceError) {
+func (s *Service) ChangeProfilePicture(ctx context.Context, userID string, file []byte) (user, errors.ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.ChangeProfilePicture")
 	defer span.End()
 
 	user, err := s.repository.FindUserByID(ctx, userID)
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newError(code.Code_PERMISSION_DENIED, err)
 	}
 
 	if user.ProfilePicture != nil {
@@ -142,7 +157,7 @@ func (s *Service) ChangeProfilePicture(ctx context.Context, userID string, file 
 			Key:    user.ProfilePicture,
 		})
 		if err != nil {
-			return user, NewInternalServiceError(err)
+			return user, s.newInternalError(err)
 		}
 	}
 
@@ -167,7 +182,7 @@ func (s *Service) ChangeProfilePicture(ctx context.Context, userID string, file 
 	if err != nil {
 		putFileToBucketSpan.End()
 		storeFileSpan.End()
-		return user, NewInternalServiceError(err)
+		return user, s.newInternalError(err)
 	}
 	putFileToBucketSpan.End()
 	storeFileSpan.End()
@@ -175,7 +190,7 @@ func (s *Service) ChangeProfilePicture(ctx context.Context, userID string, file 
 	user.ProfilePicture = &key
 	user, err = s.repository.UpdateUser(ctx, user)
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newInternalError(err)
 	}
 
 	user.addPrefixToProfilePictureURL(s.staticServiceEnpoint)
@@ -183,13 +198,13 @@ func (s *Service) ChangeProfilePicture(ctx context.Context, userID string, file 
 	return user, nil
 }
 
-func (s *Service) DeleteProfilePicture(ctx context.Context, userID string) (user, ServiceError) {
+func (s *Service) DeleteProfilePicture(ctx context.Context, userID string) (user, errors.ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.DeleteProfilePicture")
 	defer span.End()
 
 	user, err := s.repository.FindUserByID(ctx, userID)
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newError(code.Code_PERMISSION_DENIED, err)
 	}
 
 	if user.ProfilePicture == nil {
@@ -201,13 +216,35 @@ func (s *Service) DeleteProfilePicture(ctx context.Context, userID string) (user
 		Key:    user.ProfilePicture,
 	})
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newInternalError(err)
 	}
 
 	user.ProfilePicture = nil
 	err = s.repository.DeleteUserProfilePicture(ctx, user.ID)
 	if err != nil {
-		return user, NewInternalServiceError(err)
+		return user, s.newInternalError(err)
+	}
+
+	return user, nil
+}
+
+func (s *Service) AddCoin(ctx context.Context, userID string, coin int32) (user, errors.ServiceError) {
+	ctx, span := s.tracer.Start(ctx, "Service.AddCoin")
+	defer span.End()
+
+	user, err := s.repository.FindUserByID(ctx, userID)
+	if err != nil {
+		return user, s.newError(code.Code_PERMISSION_DENIED, err)
+	}
+
+	user.Coin += int(coin)
+	if user.Coin < 0 {
+		return user, s.newErrorWithCLientMessage(code.Code_INVALID_ARGUMENT, nil, "not enough coin")
+	}
+
+	user, err = s.repository.UpdateUser(ctx, user)
+	if err != nil {
+		return user, s.newInternalError(err)
 	}
 
 	return user, nil

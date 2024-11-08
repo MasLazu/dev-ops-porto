@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
 	"github.com/MasLazu/dev-ops-porto/pkg/monitoring"
@@ -45,7 +46,28 @@ func Run(ctx context.Context) error {
 	}()
 	logger.Info(ctx, "Connected to database", log.String("host", config.database.Host), log.Int("port", config.database.Port))
 
-	httpServer := bootstrap(config, db, logger)
+	httpServer, grpcServer := bootstrap(config, db, logger)
 
-	return httpServer.Run(ctx)
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		if httpError := httpServer.Run(ctx); httpError != nil {
+			logger.Error(ctx, fmt.Sprintf("Failed to run HTTP server: %v", err))
+			err = errors.Join(err, httpError)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if grpcErr := grpcServer.Run(ctx); grpcErr != nil {
+			logger.Error(ctx, fmt.Sprintf("Failed to run GRPC server: %v", err))
+			err = errors.Join(err, grpcErr)
+		}
+	}()
+
+	wg.Wait()
+
+	return err
 }

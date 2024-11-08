@@ -82,7 +82,7 @@ func (h *HttpHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.service.Register(ctx, req)
 	if err != nil {
-		h.responseWriter.WriteErrorResponse(ctx, w, err.Code(), err.Error())
+		h.responseWriter.WriteErrorResponse(ctx, w, int(err.HttpCode()), err.ClientMessage())
 		return
 	}
 
@@ -106,7 +106,7 @@ func (h *HttpHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	loginResponse, err := h.service.Login(ctx, req)
 	if err != nil {
-		h.responseWriter.WriteErrorResponse(ctx, w, err.Code(), err.Error())
+		h.responseWriter.WriteErrorResponse(ctx, w, err.HttpCode(), err.ClientMessage())
 		return
 	}
 
@@ -125,7 +125,7 @@ func (h *HttpHandler) Me(w http.ResponseWriter, r *http.Request) {
 
 	user, serviceErr := h.service.Me(ctx, userID)
 	if serviceErr != nil {
-		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.Code(), serviceErr.Error())
+		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.HttpCode(), serviceErr.ClientMessage())
 		return
 	}
 
@@ -156,7 +156,7 @@ func (h *HttpHandler) ChangeProfilePicture(w http.ResponseWriter, r *http.Reques
 
 	user, serviceErr := h.service.ChangeProfilePicture(ctx, userID, file)
 	if serviceErr != nil {
-		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.Code(), serviceErr.Error())
+		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.HttpCode(), serviceErr.ClientMessage())
 		return
 	}
 
@@ -175,7 +175,7 @@ func (h *HttpHandler) DeleteProfilePicture(w http.ResponseWriter, r *http.Reques
 
 	user, serviceErr := h.service.DeleteProfilePicture(ctx, userID)
 	if serviceErr != nil {
-		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.Code(), serviceErr.Error())
+		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.HttpCode(), serviceErr.ClientMessage())
 		return
 	}
 

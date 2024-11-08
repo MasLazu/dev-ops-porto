@@ -3,7 +3,7 @@ module github.com/MasLazu/dev-ops-porto/auth-service
 go 1.23.2
 
 require (
-	github.com/MasLazu/dev-ops-porto/pkg v1.7.0
+	github.com/MasLazu/dev-ops-porto/pkg v1.8.5
 	github.com/aws/aws-sdk-go-v2 v1.32.3
 	github.com/aws/aws-sdk-go-v2/config v1.28.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.42
@@ -15,6 +15,8 @@ require (
 	go.opentelemetry.io/otel/log v0.7.0
 	go.opentelemetry.io/otel/trace v1.31.0
 	golang.org/x/crypto v0.28.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241021214115-324edc3d5d38
+	google.golang.org/grpc v1.67.1
 )
 
 require (
@@ -68,7 +70,5 @@ require (
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241021214115-324edc3d5d38 // indirect
-	google.golang.org/grpc v1.67.1 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 )

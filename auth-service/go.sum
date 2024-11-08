@@ -1,13 +1,7 @@
 github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 h1:L/gRVlceqvL25UVaW/CKtUDjefjrs0SPonmDGUVOYP0=
 github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
-github.com/MasLazu/dev-ops-porto/pkg v1.4.3 h1:tBUaaSvlOOb3kmsSH5t1rqNhrP/W3hoMygL0ThleeFA=
-github.com/MasLazu/dev-ops-porto/pkg v1.4.3/go.mod h1:2f2beOiaLajiiAOfQzsjOs8P8soAJ9lLfpgNQXUu7r0=
-github.com/MasLazu/dev-ops-porto/pkg v1.6.0 h1:56x9SRxi8XVzeB/BJ9mDidkJDiKPPioRM47IrtaLw4M=
-github.com/MasLazu/dev-ops-porto/pkg v1.6.0/go.mod h1:2f2beOiaLajiiAOfQzsjOs8P8soAJ9lLfpgNQXUu7r0=
-github.com/MasLazu/dev-ops-porto/pkg v1.6.1 h1:w7yLOpl6oIQyqFcXdfysf8lBEjQznUiAx7uccnZIf2c=
-github.com/MasLazu/dev-ops-porto/pkg v1.6.1/go.mod h1:2f2beOiaLajiiAOfQzsjOs8P8soAJ9lLfpgNQXUu7r0=
-github.com/MasLazu/dev-ops-porto/pkg v1.7.0 h1:7pkI0ebZPa+hrFErf7RCB3tZ32jAn3RGgY+NQ7p9REQ=
-github.com/MasLazu/dev-ops-porto/pkg v1.7.0/go.mod h1:2f2beOiaLajiiAOfQzsjOs8P8soAJ9lLfpgNQXUu7r0=
+github.com/MasLazu/dev-ops-porto/pkg v1.8.5 h1:63Nc+fTtLrxklHwoZ+X9bOW/sM7d675dqztvXEhOyUI=
+github.com/MasLazu/dev-ops-porto/pkg v1.8.5/go.mod h1:MKRsGW16GWW/Zc9mfxuOTcSv+1LM8KLwRHR6wx1GzvY=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/aws/aws-sdk-go-v2 v1.32.3 h1:T0dRlFBKcdaUPGNtkBSwHZxrtis8CQU17UpNBZYd0wk=

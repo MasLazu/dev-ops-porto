@@ -27,7 +27,8 @@ type AwsConfig struct {
 }
 
 type config struct {
-	port                 int
+	httpPort             int
+	grpcPort             int
 	serviceName          string
 	otlpDomain           string
 	jwtSecret            []byte
@@ -37,7 +38,12 @@ type config struct {
 }
 
 func getConfig(ctx context.Context) (config, error) {
-	port, err := getIntEnv("PORT")
+	httpPort, err := getIntEnv("HTTP_PORT")
+	if err != nil {
+		return config{}, err
+	}
+
+	grpcPort, err := getIntEnv("GRPC_PORT")
 	if err != nil {
 		return config{}, err
 	}
@@ -53,7 +59,8 @@ func getConfig(ctx context.Context) (config, error) {
 	}
 
 	return config{
-		port:                 port,
+		httpPort:             httpPort,
+		grpcPort:             grpcPort,
 		otlpDomain:           os.Getenv("OTLP_DOMAIN"),
 		jwtSecret:            []byte(os.Getenv("JWT_SECRET")),
 		serviceName:          "auth-service",

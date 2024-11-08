@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/MasLazu/dev-ops-porto/auth-service/internal/app"
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/authservice"
 	"github.com/MasLazu/dev-ops-porto/pkg/middleware"
 	"github.com/MasLazu/dev-ops-porto/pkg/monitoring"
 	"github.com/MasLazu/dev-ops-porto/pkg/server"
@@ -12,7 +13,7 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-func bootstrap(config config, db *database.Service, logger *monitoring.Logger) *server.HttpServer {
+func bootstrap(config config, db *database.Service, logger *monitoring.Logger) (*server.HttpServer, *server.GrpcServer) {
 	client := s3.NewFromConfig(config.aws.awsConfig, func(o *s3.Options) {
 		o.UsePathStyle = true
 		o.BaseEndpoint = aws.String(config.aws.s3.enpoint)
@@ -27,9 +28,19 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger) *
 	repository := app.NewRepository(db, tracer)
 	service := app.NewService(tracer, repository, config.jwtSecret, client, config.aws.s3.bucketNames.profilePictures, config.staticServiceEnpoint)
 	handler := NewHttpHandler(service, authMiddleware, tracer, responseWriter, requestDecoder, validator, handlerTracer)
+	grpcHandler := NewGrpcHandler(tracer, service)
 
-	return server.NewHttpServer(server.HttpServerConfig{
-		Port:        config.port,
+	httpServer := server.NewHttpServer(server.HttpServerConfig{
+		Port:        config.httpPort,
 		ServiceName: config.serviceName,
 	}, handler.setupRoutes, handlerTracer, responseWriter, logger)
+
+	grpcServer := server.NewGrpcServer(server.GrpcServerConfig{
+		Port:        config.grpcPort,
+		ServiceName: config.serviceName,
+	}, logger)
+
+	authservice.RegisterAuthServiceServer(grpcServer.Server, grpcHandler)
+
+	return httpServer, grpcServer
 }
