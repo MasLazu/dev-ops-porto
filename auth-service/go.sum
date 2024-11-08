@@ -2,6 +2,8 @@ github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 h1:L/gRVlceqvL25
 github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
 github.com/MasLazu/dev-ops-porto/pkg v1.8.5 h1:63Nc+fTtLrxklHwoZ+X9bOW/sM7d675dqztvXEhOyUI=
 github.com/MasLazu/dev-ops-porto/pkg v1.8.5/go.mod h1:MKRsGW16GWW/Zc9mfxuOTcSv+1LM8KLwRHR6wx1GzvY=
+github.com/MasLazu/dev-ops-porto/pkg v1.8.6 h1:XNw/T+jXpYeKR7aalh/YvVIJImUPvksSBNIbCz6esrc=
+github.com/MasLazu/dev-ops-porto/pkg v1.8.6/go.mod h1:MKRsGW16GWW/Zc9mfxuOTcSv+1LM8KLwRHR6wx1GzvY=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/aws/aws-sdk-go-v2 v1.32.3 h1:T0dRlFBKcdaUPGNtkBSwHZxrtis8CQU17UpNBZYd0wk=
