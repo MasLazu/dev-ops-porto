@@ -77,6 +77,8 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres-assignment-service-volume:/var/lib/postgresql/data
+    networks:
+      - internal
 
   assignment-service:
     build:
@@ -131,6 +133,7 @@ services:
       DB_SCHEMA: public
       OTLP_DOMAIN: otel-collector:4317
       JWT_SECRET: yolelelele
+      GRPC_AUTH_SERVICE_DOMAIN: auth-service:443
     networks:
       - internal
 
@@ -154,7 +157,8 @@ services:
     depends_on:
       - tempo
     networks:
-      - internal
+      internal:
+        ipv4_address: 172.16.0.69
 
   init:
     image: &tempoImage grafana/tempo:latest
@@ -242,3 +246,6 @@ volumes:
 networks:
   internal:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24
