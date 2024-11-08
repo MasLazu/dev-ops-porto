@@ -11,18 +11,27 @@ type ServiceErrorCode code.Code
 
 type ServiceError interface {
 	Error() string
+	ClientMessage() string
 	Code() uint32
 	HttpCode() uint32
 	GrpcCode() codes.Code
 }
 
 type serviceError struct {
-	code ServiceErrorCode
-	err  error
+	code          ServiceErrorCode
+	err           error
+	clientMessage *string
 }
 
-func NewServiceError(code ServiceErrorCode, err error) ServiceError {
-	return &serviceError{code, err}
+func NewServiceError(code ServiceErrorCode, err error, clientMessage *string) ServiceError {
+	return &serviceError{code, err, clientMessage}
+}
+
+func (e *serviceError) ClientMessage() string {
+	if e.clientMessage == nil {
+		return e.err.Error()
+	}
+	return *e.clientMessage
 }
 
 func (e *serviceError) Code() uint32 {
