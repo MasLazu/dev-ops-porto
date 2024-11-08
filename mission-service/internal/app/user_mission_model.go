@@ -10,3 +10,7 @@ type UserMission struct {
 	UpdatedAt string  `json:"updated_at"`
 	Mission   Mission `json:"mission"`
 }
+
+type ClaimUserMissionRequest struct {
+	UserMissionID int `json:"user_mission_id"`
+}

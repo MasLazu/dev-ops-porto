@@ -65,6 +65,25 @@ func (r *UserMissionRepository) InsertUserMissionsWithTransaction(
 	return err
 }
 
+func (r *UserMissionRepository) UpdateUserMissionWithTransaction(
+	ctx context.Context,
+	tx *sql.Tx,
+	userMission UserMission,
+) error {
+	ctx, span := r.tracer.Start(ctx, "UserMissionRepository.UpdateUserMission")
+	defer span.End()
+
+	query := `
+	UPDATE users_missions
+	SET progress = $1, claimed = $2
+	WHERE id = $3
+	`
+
+	_, err := tx.ExecContext(ctx, query, userMission.Progress, userMission.Claimed, userMission.ID)
+
+	return err
+}
+
 func (r *UserMissionRepository) UpdateUserMissions(
 	ctx context.Context,
 	missions []UserMission,
@@ -105,6 +124,27 @@ func (r *UserMissionRepository) UpdateUserMissions(
 	_, err := r.db.Pool.ExecContext(ctx, query, args...)
 
 	return err
+}
+
+func (r *UserMissionRepository) GetUserMissionByIDJoinMission(ctx context.Context, userMissionID int) (UserMission, error) {
+	ctx, span := r.tracer.Start(ctx, "UserMissionRepository.GetUserMissionByID")
+	defer span.End()
+
+	query := `
+	SELECT um.id, um.user_id, um.mission_id, um.progress, um.claimed, um.created_at, um.updated_at,
+	m.id, m.title, m.illustration, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
+	FROM users_missions um
+	JOIN missions m ON m.id = um.mission_id
+	WHERE um.id = $1
+	`
+
+	var um UserMission
+	err := r.db.Pool.QueryRowContext(ctx, query, userMissionID).
+		Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
+			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
+			&um.Mission.EventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
+
+	return um, err
 }
 
 func (r *UserMissionRepository) GetUserMissionsByUserIDJoinMission(ctx context.Context, userID string) ([]UserMission, error) {

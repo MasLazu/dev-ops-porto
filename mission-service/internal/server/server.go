@@ -9,7 +9,9 @@ import (
 	"sync"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/MasLazu/dev-ops-porto/pkg/genproto/authservice"
 	"github.com/MasLazu/dev-ops-porto/pkg/monitoring"
+	"github.com/MasLazu/dev-ops-porto/pkg/util"
 	"go.opentelemetry.io/otel/log"
 )
 
@@ -45,7 +47,18 @@ func Run(ctx context.Context) (err error) {
 		err = errors.Join(err, db.Close())
 	}()
 
-	httpServer, grpcServer := bootstrap(config, db, logger)
+	missionServiceConn, err := util.NewGRPCClient(ctx, config.grpcAuthServiceDomain, logger)
+	if err != nil {
+		logger.Error(ctx, fmt.Sprintf("Failed to connect to gRPC server: %v", err), log.String("address", config.grpcAuthServiceDomain))
+		return err
+	}
+	defer func() {
+		err = errors.Join(err, missionServiceConn.Close())
+	}()
+
+	authServiceClient := authservice.NewAuthServiceClient(missionServiceConn)
+
+	httpServer, grpcServer := bootstrap(config, db, logger, authServiceClient)
 
 	var wg sync.WaitGroup
 	wg.Add(2)

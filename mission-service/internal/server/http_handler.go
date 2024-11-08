@@ -48,6 +48,7 @@ func (h *HttpHandler) SetupRoutes(c *chi.Mux) http.Handler {
 		c.Use(h.authMiddleware.Auth)
 		c.Get("/", h.GetUserMissions)
 		c.Get("/expiration", h.GetUserExpirationMissionDate)
+		c.Post("/claim", h.ClaimMission)
 	})
 
 	return c
@@ -100,4 +101,34 @@ func (h *HttpHandler) GetUserExpirationMissionDate(w http.ResponseWriter, r *htt
 	h.responseWriter.WriteSuccessResponse(ctx, w, map[string]time.Time{
 		"expiration_date": expirationDate,
 	})
+}
+
+func (h *HttpHandler) ClaimMission(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.handlerTracer.TraceHttpHandler(r, "HttpHandler.ClaimMission")
+	defer span.End()
+
+	userID, err := util.GetUserIDFromContext(ctx)
+	if err != nil {
+		h.responseWriter.WriteUnauthorizedResponse(ctx, w)
+		return
+	}
+
+	var req app.ClaimUserMissionRequest
+	if err := h.requestDecoder.Decode(ctx, r, &req); err != nil {
+		h.responseWriter.WriteBadRequestResponse(ctx, w)
+		return
+	}
+
+	if err := h.validator.Validate(ctx, req); err != nil {
+		h.responseWriter.WriteBadRequestResponse(ctx, w)
+		return
+	}
+
+	serviceErr := h.service.CaimMissionReward(ctx, req.UserMissionID, userID)
+	if serviceErr != nil {
+		h.responseWriter.WriteErrorResponse(ctx, w, serviceErr.HttpCode(), serviceErr.ClientMessage())
+		return
+	}
+
+	h.responseWriter.WriteSuccessResponse(ctx, w, nil)
 }

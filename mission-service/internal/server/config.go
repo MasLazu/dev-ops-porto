@@ -9,12 +9,13 @@ import (
 )
 
 type config struct {
-	httpPort    int
-	grpcPort    int
-	otlpDomain  string
-	database    database.Config
-	serviceName string
-	jwtSecret   []byte
+	httpPort              int
+	grpcPort              int
+	otlpDomain            string
+	database              database.Config
+	serviceName           string
+	jwtSecret             []byte
+	grpcAuthServiceDomain string
 }
 
 func getConfig() (config, error) {
@@ -34,12 +35,13 @@ func getConfig() (config, error) {
 	}
 
 	return config{
-		httpPort:    httpPort,
-		grpcPort:    grpcPort,
-		otlpDomain:  os.Getenv("OTLP_DOMAIN"),
-		jwtSecret:   []byte(os.Getenv("JWT_SECRET")),
-		serviceName: "mission-service",
-		database:    dbConfig,
+		httpPort:              httpPort,
+		grpcPort:              grpcPort,
+		otlpDomain:            os.Getenv("OTLP_DOMAIN"),
+		jwtSecret:             []byte(os.Getenv("JWT_SECRET")),
+		serviceName:           "mission-service",
+		grpcAuthServiceDomain: os.Getenv("GRPC_AUTH_SERVICE_DOMAIN"),
+		database:              dbConfig,
 	}, nil
 }
 
