@@ -23,12 +23,12 @@ type serviceError struct {
 	clientMessage *string
 }
 
-func NewServiceErrorWithClientMessage(code ServiceErrorCode, err error, clientMessage string) ServiceError {
-	return &serviceError{code, err, &clientMessage}
+func NewServiceErrorWithClientMessage(code code.Code, err error, clientMessage string) ServiceError {
+	return &serviceError{ServiceErrorCode(code), err, &clientMessage}
 }
 
-func NewServiceError(code ServiceErrorCode, err error) ServiceError {
-	return &serviceError{code, err, nil}
+func NewServiceError(code code.Code, err error) ServiceError {
+	return &serviceError{ServiceErrorCode(code), err, nil}
 }
 
 func (e *serviceError) ClientMessage() string {
