@@ -43,7 +43,11 @@ func (e *serviceError) Code() uint32 {
 }
 
 func (e *serviceError) Error() string {
-	return e.err.Error()
+	if e.err != nil {
+		return e.err.Error()
+	}
+
+	return http.StatusText(int(e.code.toHttpCode()))
 }
 
 func (e *serviceError) HttpCode() int {
