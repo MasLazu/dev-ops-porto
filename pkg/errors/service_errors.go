@@ -13,7 +13,7 @@ type ServiceError interface {
 	Error() string
 	ClientMessage() string
 	Code() uint32
-	HttpCode() uint32
+	HttpCode() int
 	GrpcCode() codes.Code
 }
 
@@ -46,8 +46,8 @@ func (e *serviceError) Error() string {
 	return e.err.Error()
 }
 
-func (e *serviceError) HttpCode() uint32 {
-	return e.code.toHttpCode()
+func (e *serviceError) HttpCode() int {
+	return int(e.code.toHttpCode())
 }
 
 func (e *serviceError) GrpcCode() codes.Code {
