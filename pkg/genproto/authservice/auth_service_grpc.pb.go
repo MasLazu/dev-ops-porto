@@ -19,139 +19,139 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MissionService_AddUserCoins_FullMethodName    = "/MissionService/AddUserCoins"
-	MissionService_ReduceUserCoins_FullMethodName = "/MissionService/ReduceUserCoins"
+	AuthService_AddUserCoins_FullMethodName    = "/AuthService/AddUserCoins"
+	AuthService_ReduceUserCoins_FullMethodName = "/AuthService/ReduceUserCoins"
 )
 
-// MissionServiceClient is the client API for MissionService service.
+// AuthServiceClient is the client API for AuthService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MissionServiceClient interface {
+type AuthServiceClient interface {
 	AddUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 	ReduceUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 }
 
-type missionServiceClient struct {
+type authServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMissionServiceClient(cc grpc.ClientConnInterface) MissionServiceClient {
-	return &missionServiceClient{cc}
+func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
+	return &authServiceClient{cc}
 }
 
-func (c *missionServiceClient) AddUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+func (c *authServiceClient) AddUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EmptyResponse)
-	err := c.cc.Invoke(ctx, MissionService_AddUserCoins_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthService_AddUserCoins_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *missionServiceClient) ReduceUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+func (c *authServiceClient) ReduceUserCoins(ctx context.Context, in *UserCoinsRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EmptyResponse)
-	err := c.cc.Invoke(ctx, MissionService_ReduceUserCoins_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthService_ReduceUserCoins_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MissionServiceServer is the server API for MissionService service.
-// All implementations must embed UnimplementedMissionServiceServer
+// AuthServiceServer is the server API for AuthService service.
+// All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
-type MissionServiceServer interface {
+type AuthServiceServer interface {
 	AddUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error)
 	ReduceUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error)
-	mustEmbedUnimplementedMissionServiceServer()
+	mustEmbedUnimplementedAuthServiceServer()
 }
 
-// UnimplementedMissionServiceServer must be embedded to have
+// UnimplementedAuthServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedMissionServiceServer struct{}
+type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedMissionServiceServer) AddUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error) {
+func (UnimplementedAuthServiceServer) AddUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddUserCoins not implemented")
 }
-func (UnimplementedMissionServiceServer) ReduceUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error) {
+func (UnimplementedAuthServiceServer) ReduceUserCoins(context.Context, *UserCoinsRequest) (*EmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReduceUserCoins not implemented")
 }
-func (UnimplementedMissionServiceServer) mustEmbedUnimplementedMissionServiceServer() {}
-func (UnimplementedMissionServiceServer) testEmbeddedByValue()                        {}
+func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
+func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
 
-// UnsafeMissionServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MissionServiceServer will
+// UnsafeAuthServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AuthServiceServer will
 // result in compilation errors.
-type UnsafeMissionServiceServer interface {
-	mustEmbedUnimplementedMissionServiceServer()
+type UnsafeAuthServiceServer interface {
+	mustEmbedUnimplementedAuthServiceServer()
 }
 
-func RegisterMissionServiceServer(s grpc.ServiceRegistrar, srv MissionServiceServer) {
-	// If the following call pancis, it indicates UnimplementedMissionServiceServer was
+func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
+	// If the following call pancis, it indicates UnimplementedAuthServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&MissionService_ServiceDesc, srv)
+	s.RegisterService(&AuthService_ServiceDesc, srv)
 }
 
-func _MissionService_AddUserCoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthService_AddUserCoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserCoinsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MissionServiceServer).AddUserCoins(ctx, in)
+		return srv.(AuthServiceServer).AddUserCoins(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MissionService_AddUserCoins_FullMethodName,
+		FullMethod: AuthService_AddUserCoins_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MissionServiceServer).AddUserCoins(ctx, req.(*UserCoinsRequest))
+		return srv.(AuthServiceServer).AddUserCoins(ctx, req.(*UserCoinsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MissionService_ReduceUserCoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthService_ReduceUserCoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserCoinsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MissionServiceServer).ReduceUserCoins(ctx, in)
+		return srv.(AuthServiceServer).ReduceUserCoins(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MissionService_ReduceUserCoins_FullMethodName,
+		FullMethod: AuthService_ReduceUserCoins_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MissionServiceServer).ReduceUserCoins(ctx, req.(*UserCoinsRequest))
+		return srv.(AuthServiceServer).ReduceUserCoins(ctx, req.(*UserCoinsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// MissionService_ServiceDesc is the grpc.ServiceDesc for MissionService service.
+// AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var MissionService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "MissionService",
-	HandlerType: (*MissionServiceServer)(nil),
+var AuthService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "AuthService",
+	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "AddUserCoins",
-			Handler:    _MissionService_AddUserCoins_Handler,
+			Handler:    _AuthService_AddUserCoins_Handler,
 		},
 		{
 			MethodName: "ReduceUserCoins",
-			Handler:    _MissionService_ReduceUserCoins_Handler,
+			Handler:    _AuthService_ReduceUserCoins_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
