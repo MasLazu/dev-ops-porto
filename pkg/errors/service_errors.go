@@ -23,13 +23,17 @@ type serviceError struct {
 	clientMessage *string
 }
 
-func NewServiceError(code ServiceErrorCode, err error, clientMessage *string) ServiceError {
-	return &serviceError{code, err, clientMessage}
+func NewServiceErrorWithClientMessage(code ServiceErrorCode, err error, clientMessage string) ServiceError {
+	return &serviceError{code, err, &clientMessage}
+}
+
+func NewServiceError(code ServiceErrorCode, err error) ServiceError {
+	return &serviceError{code, err, nil}
 }
 
 func (e *serviceError) ClientMessage() string {
 	if e.clientMessage == nil {
-		return e.err.Error()
+		return http.StatusText(int(e.code.toHttpCode()))
 	}
 	return *e.clientMessage
 }
