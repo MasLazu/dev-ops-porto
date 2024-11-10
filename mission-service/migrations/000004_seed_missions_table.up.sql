@@ -2,7 +2,7 @@ INSERT INTO
     missions (
         id,
         title,
-        illustration,
+        image_path,
         reward,
         goal,
         event_encreasor_id,

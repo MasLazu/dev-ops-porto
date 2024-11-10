@@ -46,6 +46,21 @@ services:
             service.version: "3.5"
           sampling_rate: 1.0
 
+  - name: theme-service
+    url: http://theme-service:80
+    routes:
+      - name: theme-service
+        paths:
+          - /theme
+    plugins:
+      - name: opentelemetry
+        config:
+          endpoint: http://otel-collector:4318/v1/traces
+          resource_attributes:
+            service.name: theme-service
+            service.version: "3.5"
+          sampling_rate: 1.0
+
   - name: static-service
     url: http://static-service:80
     routes:

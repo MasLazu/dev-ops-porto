@@ -255,8 +255,6 @@ func (s *Service) CaimMissionReward(ctx context.Context, userMissionID int, user
 		Coins:  int32(userMission.Mission.Reward),
 	}
 
-	log.Printf("User %s claimed %d coins", userMission.UserID, userMission.Mission.Reward)
-
 	_, addUserCoinSpan := s.tracer.Start(ctx, "Service.AddUserCoins")
 	_, err = s.authServiceClient.AddUserCoins(ctx, req)
 	if err != nil {

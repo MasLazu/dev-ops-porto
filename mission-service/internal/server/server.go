@@ -47,16 +47,16 @@ func Run(ctx context.Context) (err error) {
 		err = errors.Join(err, db.Close())
 	}()
 
-	missionServiceConn, err := util.NewGRPCClient(ctx, config.grpcAuthServiceDomain, logger)
+	authServiceConn, err := util.NewGRPCClient(ctx, config.grpcAuthServiceDomain, logger)
 	if err != nil {
 		logger.Error(ctx, fmt.Sprintf("Failed to connect to gRPC server: %v", err), log.String("address", config.grpcAuthServiceDomain))
 		return err
 	}
 	defer func() {
-		err = errors.Join(err, missionServiceConn.Close())
+		err = errors.Join(err, authServiceConn.Close())
 	}()
 
-	authServiceClient := authservice.NewAuthServiceClient(missionServiceConn)
+	authServiceClient := authservice.NewAuthServiceClient(authServiceConn)
 
 	httpServer, grpcServer := bootstrap(config, db, logger, authServiceClient)
 
