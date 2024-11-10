@@ -132,7 +132,7 @@ func (r *UserMissionRepository) GetUserMissionByIDJoinMission(ctx context.Contex
 
 	query := `
 	SELECT um.id, um.user_id, um.mission_id, um.progress, um.claimed, um.created_at, um.updated_at,
-	m.id, m.title, m.illustration, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
+	m.id, m.title, m.image_path, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
 	FROM users_missions um
 	JOIN missions m ON m.id = um.mission_id
 	WHERE um.id = $1
@@ -141,7 +141,7 @@ func (r *UserMissionRepository) GetUserMissionByIDJoinMission(ctx context.Contex
 	var um UserMission
 	err := r.db.Pool.QueryRowContext(ctx, query, userMissionID).
 		Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
-			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
+			&um.Mission.ID, &um.Mission.Title, &um.Mission.ImagePath, &um.Mission.EventEncreasorID,
 			&um.Mission.EventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
 
 	return um, err
@@ -153,7 +153,7 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDJoinMission(ctx context.C
 
 	query := `
 	SELECT um.id, um.user_id, um.mission_id, um.progress, um.claimed, um.created_at, um.updated_at,
-	m.id, m.title, m.illustration, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
+	m.id, m.title, m.image_path, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
 	FROM users_missions um
 	JOIN missions m ON m.id = um.mission_id
 	WHERE um.user_id = $1
@@ -171,7 +171,7 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDJoinMission(ctx context.C
 		var um UserMission
 		var eventDecreasorID sql.NullInt32
 		err := rows.Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
-			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
+			&um.Mission.ID, &um.Mission.Title, &um.Mission.ImagePath, &um.Mission.EventEncreasorID,
 			&eventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
 		if err != nil {
 			return userMissions, err
@@ -199,7 +199,7 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDAndEncreasorEventIDJoinMi
 
 	query := `
 	SELECT um.id, um.user_id, um.mission_id, um.progress, um.claimed, um.created_at, um.updated_at,
-	m.id, m.title, m.illustration, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
+	m.id, m.title, m.image_path, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
 	FROM users_missions um
 	JOIN missions m ON m.id = um.mission_id
 	WHERE um.user_id = $1 AND m.event_encreasor_id = $2
@@ -216,7 +216,7 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDAndEncreasorEventIDJoinMi
 		var um UserMission
 		empty = false
 		err := rows.Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
-			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
+			&um.Mission.ID, &um.Mission.Title, &um.Mission.ImagePath, &um.Mission.EventEncreasorID,
 			&um.Mission.EventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
 		if err != nil {
 			return missions, err
@@ -243,7 +243,7 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDAndDecreasorEventIDJoinMi
 
 	query := `
 	SELECT um.id, um.user_id, um.mission_id, um.progress, um.claimed, um.created_at, um.updated_at, 
-	m.id, m.title, m.illustration, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
+	m.id, m.title, m.image_path, m.event_encreasor_id, m.event_decreasor_id, m.goal, m.reward, m.created_at, m.updated_at
 	FROM users_missions um
 	JOIN missions m ON m.id = um.mission_id
 	WHERE um.user_id = $1 AND m.event_decreasor_id = $2
@@ -261,7 +261,7 @@ func (r *UserMissionRepository) GetUserMissionsByUserIDAndDecreasorEventIDJoinMi
 		var eventDecreasorID sql.NullInt32
 		empty = false
 		err := rows.Scan(&um.ID, &um.UserID, &um.MissionID, &um.Progress, &um.Claimed, &um.CreatedAt, &um.UpdatedAt,
-			&um.Mission.ID, &um.Mission.Title, &um.Mission.Illustration, &um.Mission.EventEncreasorID,
+			&um.Mission.ID, &um.Mission.Title, &um.Mission.ImagePath, &um.Mission.EventEncreasorID,
 			&eventDecreasorID, &um.Mission.Goal, &um.Mission.Reward, &um.Mission.CreatedAt, &um.Mission.UpdatedAt)
 		if err != nil {
 			return missions, err

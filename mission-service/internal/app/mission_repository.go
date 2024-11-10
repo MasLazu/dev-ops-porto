@@ -24,7 +24,7 @@ func (r *MissionRepository) GetUserMissions(ctx context.Context, userID string) 
 	missions := []Mission{}
 
 	query := `
-	SELECT m.id, m.title, m.illustration, m.goal, m.reward, m.created_at, m.updated_at
+	SELECT m.id, m.title, m.image_path, m.goal, m.reward, m.created_at, m.updated_at
 	FROM missions m
 	JOIN users_missions um ON um.mission_id = m.id
 	JOIN users u ON u.id = um.user_id
@@ -41,7 +41,7 @@ func (r *MissionRepository) GetUserMissions(ctx context.Context, userID string) 
 	for rows.Next() {
 		var m Mission
 		empty = false
-		err := rows.Scan(&m.ID, &m.Title, &m.Illustration, &m.Goal, &m.Reward, &m.CreatedAt, &m.UpdatedAt)
+		err := rows.Scan(&m.ID, &m.Title, &m.ImagePath, &m.Goal, &m.Reward, &m.CreatedAt, &m.UpdatedAt)
 		if err != nil {
 			return missions, err
 		}
