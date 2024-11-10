@@ -137,6 +137,40 @@ services:
     networks:
       - internal
 
+  postgres-theme-service:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: theme_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - internal
+    volumes:
+      - postgres-theme-service-volume:/var/lib/postgresql/data
+
+  theme-service:
+    build:
+      context: ./theme-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-theme-service
+      - otel-collector
+    environment:
+      PORT: 80
+      APP_ENV: local
+      DB_HOST: postgres-theme-service
+      DB_PORT: 5432
+      DB_DATABASE: theme_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SCHEMA: public
+      OTLP_DOMAIN: otel-collector:4317
+      JWT_SECRET: yolelelele
+      GRPC_AUTH_SERVICE_DOMAIN: auth-service:443
+    networks:
+      - internal
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib
     volumes:
@@ -237,6 +271,7 @@ volumes:
   postgres-auth-service-volume:
   postgres-assignment-service-volume:
   postgres-mission-service-volume:
+  postgres-theme-service-volume:
   grafana-volume:
   minio-volume:
   tempo-volume:
