@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-postgres
+spec:
+  destination:
+    name: ""
+    namespace: database
+    server: https://kubernetes.default.svc
+  source:
+    path: ""
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 16.2.1
+    chart: postgresql
+    helm:
+      parameters:
+        - name: auth.database
+          value: database
+        - name: auth.replicationUsername
+          value: postgres
+        - name: auth.user
+          value: postgres
+        - name: auth.passowrd
+          value: postgres
+        - name: auth.secretKeys.adminPasswordKey
+          value: postgres
+        - name: auth.secretKeys.replicationPasswordKey
+          value: postgres
+        - name: auth.secretKeys.userPasswordKey
+          value: postgres
+        - name: auth.password
+          value: postgres
+        - name: auth.postgresPassword
+          value: postgres
+        - name: auth.replicationPassword
+          value: postgres
+        - name: auth.username
+          value: postgres
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true

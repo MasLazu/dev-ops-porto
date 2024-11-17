@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opentelemetry-collector
+spec:
+  destination:
+    name: ""
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  source:
+    path: ""
+    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    targetRevision: 0.109.0
+    chart: opentelemetry-collector
+    helm:
+      parameters:
+        - name: mode
+          value: statefulset
+        - name: config.exporters.prometheus.endpoint
+          value: 0.0.0.0:9464
+        - name: config.exporters.otlphttp.endpoint
+          value: http://loki-stack:3100/otlp
+        - name: config.exporters.otlp.endpoint
+          value: http://tempo:4317
+        - name: config.exporters.otlp.tls.insecure
+          value: "true"
+        - name: image.repository
+          value: "otel/opentelemetry-collector"
+        - name: image.tag
+          value: "latest"
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki-stack
+spec:
+  destination:
+    name: ""
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  source:
+    path: ""
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 2.10.2
+    chart: loki-stack
+    helm:
+      parameters:
+        - name: loki.image.tag
+          value: 2.9.3
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true

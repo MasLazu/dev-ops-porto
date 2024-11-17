@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: theme-postgres-exporter
+spec:
+  destination:
+    name: ""
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  source:
+    path: ""
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 6.4.0
+    chart: prometheus-postgres-exporter
+    helm:
+      parameters:
+        - name: config.datasource.database
+          value: database
+        - name: config.datasource.host
+          value: theme-postgres-postgresql.database
+        - name: config.datasource.password
+          value: postgres
+        - name: serviceMonitor.enabled
+          value: "true"
+        - name: serviceMonitor.namespace
+          value: monitoring
+        - name: serviceMonitor.interval
+          value: 30s
+        - name: serviceMonitor.timeout
+          value: 10s
+        - name: serviceMonitor.labels.release
+          value: kube-prometheus-stack
+        - name: serviceMonitor.labels.app
+          value: theme-postgres-exporter
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
