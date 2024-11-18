@@ -8,10 +8,12 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - name: http
-      containerPort: {{ .Values.service.http.port }}
+      port: {{ .Values.service.http.port }}
+      targetPort: {{ .Values.service.http.port }}
       protocol: TCP
     - name: grpc
-      containerPort: {{ .Values.service.grpc.port }}
+      port: {{ .Values.service.grpc.port }}
+      targetPort: {{ .Values.service.grpc.port }}
       protocol: TCP
   selector:
     {{- include "auth-service.selectorLabels" . | nindent 4 }}
