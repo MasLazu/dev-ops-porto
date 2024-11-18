@@ -64,7 +64,7 @@ service:
     port: 443
 
 otelcollector:
-  doman: "opentelemetry-collector.monitoring:4317"
+  domain: "opentelemetry-collector.monitoring:4317"
 
 database:
   host: auth-postgres-postgresql.database

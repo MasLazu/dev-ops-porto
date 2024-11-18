@@ -17,87 +17,87 @@ spec:
         - name: serviceMonitor.enabled
           value: "true"
         - name: ingress.enabled
-          value: "true"
+          value: "false"
         - name: ingress.hostname
           value: prioritiq.local
         - name: dblessConfig.config
           value: |
-    _format_version: "3.0"
-    services:
-      - name: auth-service
-        url: http://auth-service.app:80
-        routes:
-          - name: auth-service
-            paths:
-              - /auth
-        plugins:
-          - name: opentelemetry
-            config:
-              endpoint: http://otel-collector:4318/v1/traces
-              resource_attributes:
-                service.name: auth-service
-                service.version: "3.5"
-              sampling_rate: 1.0
+            _format_version: "3.0"
+            services:
+              - name: auth-service
+                url: http://auth-service.app:80
+                routes:
+                  - name: auth-service
+                    paths:
+                      - /auth
+                plugins:
+                  - name: opentelemetry
+                    config:
+                      endpoint: http://otel-collector:4318/v1/traces
+                      resource_attributes:
+                        service.name: auth-service
+                        service.version: "3.5"
+                      sampling_rate: 1.0
 
-      - name: assignment-service
-        url: http://assignment-service.app:80
-        routes:
-          - name: assignment-service
-            paths:
-              - /assignment
-        plugins:
-          - name: opentelemetry
-            config:
-              endpoint: http://otel-collector:4318/v1/traces
-              resource_attributes:
-                service.name: assignment-service
-                service.version: "3.5"
-              sampling_rate: 1.0
+              - name: assignment-service
+                url: http://assignment-service.app:80
+                routes:
+                  - name: assignment-service
+                    paths:
+                      - /assignment
+                plugins:
+                  - name: opentelemetry
+                    config:
+                      endpoint: http://otel-collector:4318/v1/traces
+                      resource_attributes:
+                        service.name: assignment-service
+                        service.version: "3.5"
+                      sampling_rate: 1.0
 
-      - name: mission-service
-        url: http://mission-service.app:80
-        routes:
-          - name: mission-service
-            paths:
-              - /mission
-        plugins:
-          - name: opentelemetry
-            config:
-              endpoint: http://otel-collector:4318/v1/traces
-              resource_attributes:
-                service.name: mission-service
-                service.version: "3.5"
-              sampling_rate: 1.0
+              - name: mission-service
+                url: http://mission-service.app:80
+                routes:
+                  - name: mission-service
+                    paths:
+                      - /mission
+                plugins:
+                  - name: opentelemetry
+                    config:
+                      endpoint: http://otel-collector:4318/v1/traces
+                      resource_attributes:
+                        service.name: mission-service
+                        service.version: "3.5"
+                      sampling_rate: 1.0
 
-      - name: theme-service
-        url: http://theme-service.app:80
-        routes:
-          - name: theme-service
-            paths:
-              - /theme
-        plugins:
-          - name: opentelemetry
-            config:
-              endpoint: http://otel-collector:4318/v1/traces
-              resource_attributes:
-                service.name: theme-service
-                service.version: "3.5"
-              sampling_rate: 1.0
+              - name: theme-service
+                url: http://theme-service.app:80
+                routes:
+                  - name: theme-service
+                    paths:
+                      - /theme
+                plugins:
+                  - name: opentelemetry
+                    config:
+                      endpoint: http://otel-collector:4318/v1/traces
+                      resource_attributes:
+                        service.name: theme-service
+                        service.version: "3.5"
+                      sampling_rate: 1.0
 
-      - name: static-service
-        url: http://static-service.app:80
-        routes:
-          - name: static-service
-            paths:
-              - /static
-        plugins:
-          - name: opentelemetry
-            config:
-              endpoint: http://otel-collector:4318/v1/traces
-              resource_attributes:
-                service.name: static-service
-                service.version: "3.5"
-              sampling_rate: 1.0
+              - name: static-service
+                url: http://static-service.app:80
+                routes:
+                  - name: static-service
+                    paths:
+                      - /static
+                plugins:
+                  - name: opentelemetry
+                    config:
+                      endpoint: http://otel-collector:4318/v1/traces
+                      resource_attributes:
+                        service.name: static-service
+                        service.version: "3.5"
+                      sampling_rate: 1.0
   sources: []
   project: default
   syncPolicy:
