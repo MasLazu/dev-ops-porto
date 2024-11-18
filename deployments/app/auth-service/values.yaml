@@ -63,6 +63,9 @@ service:
     # This is the port the service will be accessible on
     port: 443
 
+otelcollector:
+  doman: "opentelemetry-collector.monitoring:4317"
+
 database:
   host: auth-postgres-postgresql.database
   port: 5432

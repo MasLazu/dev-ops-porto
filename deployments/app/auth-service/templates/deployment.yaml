@@ -45,7 +45,7 @@ spec:
             - DB_USERNAME: {{ .Values.database.username }}
             - DB_PASSWORD: {{ .Values.database.password }}
             - DB_SCHEMA: {{ .Values.database.schema }}
-            - OTLP_DOMAIN: {{ .Values.otlp.domain }}
+            - OTLP_DOMAIN: {{ .Values.otelcollector.domain }}
             - JWT_SECRET: {{ .Values.jwt.secret }}
             - S3_ACCESS_KEY: {{ .Values.s3.accessKey }}
             - S3_SECRET_KEY: {{ .Values.s3.secretKey }}
