@@ -14,10 +14,12 @@ spec:
     chart: kong
     helm:
       parameters:
+        - name: ingressController.enabled
+          value: "false"
         - name: serviceMonitor.enabled
           value: "true"
         - name: ingress.enabled
-          value: "false"
+          value: "true"
         - name: ingress.hostname
           value: prioritiq.local
         - name: dblessConfig.config
