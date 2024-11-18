@@ -37,37 +37,37 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           env:
             - name: HTTP_PORT
-              value: {{ .Values.service.http.port }}
+              value: "{{ .Values.service.http.port }}"
             - name: GRPC_PORT
-              value: {{ .Values.service.grpc.port }}
+              value: "{{ .Values.service.grpc.port }}"
             - name: APP_ENV
-              value: {{ .Values.service.env }}
+              value: "{{ .Values.service.env }}"
             - name: DB_HOST
-              value: {{ .Values.database.host }}
+              value: "{{ .Values.database.host }}"
             - name: DB_PORT
-              value: {{ .Values.database.port }}
+              value: "{{ .Values.database.port }}"
             - name: DB_DATABASE
-              value: {{ .Values.database.name }}
+              value: "{{ .Values.database.name }}"
             - name: DB_USERNAME
-              value: {{ .Values.database.username }}
+              value: "{{ .Values.database.username }}"
             - name: DB_PASSWORD
-              value: {{ .Values.database.password }}
+              value: "{{ .Values.database.password }}"
             - name: DB_SCHEMA
-              value: {{ .Values.database.schema }}
+              value: "{{ .Values.database.schema }}"
             - name: OTLP_DOMAIN
-              value: {{ .Values.otelcollector.domain }}
+              value: "{{ .Values.otelcollector.domain }}"
             - name: JWT_SECRET
-              value: {{ .Values.jwt.secret }}
+              value: "{{ .Values.jwt.secret }}"
             - name: S3_ACCESS_KEY
-              value: {{ .Values.s3.accessKey }}
+              value: "{{ .Values.s3.accessKey }}"
             - name: S3_SECRET_KEY
-              value: {{ .Values.s3.secretKey }}
+              value: "{{ .Values.s3.secretKey }}"
             - name: S3_ENDPOINT
-              value: {{ .Values.s3.endpoint }}
+              value: "{{ .Values.s3.endpoint }}"
             - name: S3_BUCKET_PROFILE_PICTURES
-              value: {{ .Values.s3.bucketProfilePictures }}
+              value: "{{ .Values.s3.bucketProfilePictures }}"
             - name: PUBLIC_STATIC_SERVICE_ENDPOINT
-              value: {{ .Values.publicStaticServiceEndpoint }}
+              value: "{{ .Values.publicStaticServiceEndpoint }}"
           ports:
             - name: http
               containerPort: {{ .Values.service.http.port }}
