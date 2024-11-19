@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mission-service.fullname" . }}
+  name: {{ include "auth-service.fullname" . }}
   labels:
-    {{- include "mission-service.labels" . | nindent 4 }}
+    {{- include "auth-service.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "mission-service.selectorLabels" . | nindent 6 }}
+      {{- include "auth-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "mission-service.labels" . | nindent 8 }}
+        {{- include "auth-service.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "mission-service.serviceAccountName" . }}
+      serviceAccountName: {{ include "auth-service.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -35,10 +35,45 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: HTTP_PORT
+              value: "{{ .Values.service.http.port }}"
+            - name: GRPC_PORT
+              value: "{{ .Values.service.grpc.port }}"
+            - name: APP_ENV
+              value: "{{ .Values.service.env }}"
+            - name: DB_HOST
+              value: "{{ .Values.database.host }}"
+            - name: DB_PORT
+              value: "{{ .Values.database.port }}"
+            - name: DB_DATABASE
+              value: "{{ .Values.database.name }}"
+            - name: DB_USERNAME
+              value: "{{ .Values.database.username }}"
+            - name: DB_PASSWORD
+              value: "{{ .Values.database.password }}"
+            - name: DB_SCHEMA
+              value: "{{ .Values.database.schema }}"
+            - name: OTLP_DOMAIN
+              value: "{{ .Values.otelcollector.domain }}"
+            - name: JWT_SECRET
+              value: "{{ .Values.jwt.secret }}"
+            - name: S3_ACCESS_KEY
+              value: "{{ .Values.s3.accessKey }}"
+            - name: S3_SECRET_KEY
+              value: "{{ .Values.s3.secretKey }}"
+            - name: S3_ENDPOINT
+              value: "{{ .Values.s3.endpoint }}"
+            - name: S3_BUCKET_PROFILE_PICTURES
+              value: "{{ .Values.s3.bucketProfilePictures }}"
+            - name: PUBLIC_STATIC_SERVICE_ENDPOINT
+              value: "{{ .Values.publicStaticServiceEndpoint }}"
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.service.http.port }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.service.grpc.port }}
               protocol: TCP
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
