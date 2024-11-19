@@ -19,11 +19,17 @@ spec:
         - name: config.exporters.prometheus.endpoint
           value: 0.0.0.0:9464
         - name: config.exporters.otlphttp.endpoint
-          value: http://loki-stack:3100/otlp
+          value: http://loki-stack.monitoring:3100/otlp
         - name: config.exporters.otlp.endpoint
-          value: http://tempo:4317
+          value: tempo.monitoring:4317
         - name: config.exporters.otlp.tls.insecure
           value: "true"
+        - name: config.service.pipelines.logs.exporters[0]
+          value: otlphttp
+        - name: config.service.pipelines.metrics.exporters[0]
+          value: prometheus
+        - name: config.service.pipelines.traces.exporters[0]
+          value: otlp
         - name: image.repository
           value: "otel/opentelemetry-collector"
         - name: image.tag
