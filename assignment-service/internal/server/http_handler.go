@@ -222,6 +222,7 @@ func (h *HttpHandler) ChangeIsCompletedByID(w http.ResponseWriter, r *http.Reque
 	if serviceErr != nil {
 		code := serviceErr.Code()
 		h.responseWriter.WriteErrorResponse(ctx, w, code, http.StatusText(code))
+		return
 	}
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, assignment)
