@@ -230,11 +230,15 @@ func (s *Service) ChangeIsCompletedByID(ctx context.Context, userID string, assi
 	}
 
 	if assignment.IsCompleted != isCompleted && isCompleted {
-		s.triggerMissionEvent(ctx, userID, missionservice.TriggerMissionEvent_MISSION_EVENT_DONE_ASSIGNMENT)
+		if err := s.triggerMissionEvent(ctx, userID, missionservice.TriggerMissionEvent_MISSION_EVENT_DONE_ASSIGNMENT); err != nil {
+			return Assignment{}, NewInternalServiceError(err)
+		}
 	}
 
 	if assignment.IsCompleted != isCompleted && !isCompleted {
-		s.triggerMissionEvent(ctx, userID, missionservice.TriggerMissionEvent_MISSION_EVENT_UNDONE_ASSIGNMENT)
+		if err := s.triggerMissionEvent(ctx, userID, missionservice.TriggerMissionEvent_MISSION_EVENT_UNDONE_ASSIGNMENT); err != nil {
+			return Assignment{}, NewInternalServiceError(err)
+		}
 	}
 
 	assignment.IsCompleted = isCompleted

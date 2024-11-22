@@ -56,6 +56,14 @@ func (rw *ResponseWriter) WriteJSONResponse(ctx context.Context, w http.Response
 	rw.writeJSONResponse(ctx, w, statusCode, message, data)
 }
 
+func (rw *ResponseWriter) WriteJSONResponseWithInternalError(ctx context.Context, w http.ResponseWriter, statusCode int, message string, data any, err error) {
+	ctx, span := rw.tracer.Start(ctx, "writing response with internal error")
+	defer span.End()
+
+	span.SetAttributes(attribute.String("internalError.message", err.Error()))
+	rw.writeJSONResponse(ctx, w, statusCode, message, data)
+}
+
 func (rw *ResponseWriter) writeJSONResponse(ctx context.Context, w http.ResponseWriter, statusCode int, message string, data any) {
 	ctx, span := rw.tracer.Start(ctx, "writing response")
 	defer span.End()
