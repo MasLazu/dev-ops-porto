@@ -142,19 +142,3 @@ func (r *AssignmentRepository) UpdateAssignmentWithTransaction(ctx context.Conte
 
 	return a, err
 }
-
-func (r *AssignmentRepository) UpdateAssignmentWith(ctx context.Context, assignment Assignment) (Assignment, error) {
-	query := `
-	UPDATE assignments
-	SET title = $1, note = $2, due_date = $3, is_completed = $4, is_important = $5, updated_at = NOW()
-	WHERE id = $6
-	RETURNING id, user_id, title, note, due_date, is_completed, is_important, created_at, updated_at
-	`
-
-	var a Assignment
-	err := r.db.Pool.QueryRowContext(ctx, query, assignment.Title, assignment.Note, assignment.DueDate, assignment.IsCompleted, assignment.IsImportant, assignment.ID).Scan(
-		&a.ID, &a.UserID, &a.Title, &a.Note, &a.DueDate, &a.IsCompleted, &a.IsImportant, &a.CreatedAt, &a.UpdatedAt,
-	)
-
-	return a, err
-}

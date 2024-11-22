@@ -131,7 +131,7 @@ func (h *HttpHandler) GetAssignmentByID(w http.ResponseWriter, r *http.Request) 
 	assignment, serviceErr := h.service.GetAssignmentByID(ctx, userID, assignmentID)
 	if serviceErr != nil {
 		code := serviceErr.Code()
-		h.responseWriter.WriteErrorResponse(ctx, w, code, http.StatusText(code))
+		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
 	}
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, assignment)
@@ -155,7 +155,7 @@ func (h *HttpHandler) DeleteAssignmentByID(w http.ResponseWriter, r *http.Reques
 
 	if serviceErr := h.service.DeleteAssignmentByID(ctx, userID, assignmentID); serviceErr != nil {
 		code := serviceErr.Code()
-		h.responseWriter.WriteErrorResponse(ctx, w, code, http.StatusText(code))
+		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
 	}
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, nil)
@@ -191,7 +191,7 @@ func (h *HttpHandler) UpdateAssignmentByID(w http.ResponseWriter, r *http.Reques
 	assignment, serviceErr := h.service.UpdateAssignmentByID(ctx, userID, assignmentID, request)
 	if serviceErr != nil {
 		code := serviceErr.Code()
-		h.responseWriter.WriteErrorResponse(ctx, w, code, http.StatusText(code))
+		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
 	}
 
 	h.responseWriter.WriteSuccessResponse(ctx, w, assignment)
@@ -221,7 +221,7 @@ func (h *HttpHandler) ChangeIsCompletedByID(w http.ResponseWriter, r *http.Reque
 	assignment, serviceErr := h.service.ChangeIsCompletedByID(ctx, userID, request.ID, request.IsCompleted)
 	if serviceErr != nil {
 		code := serviceErr.Code()
-		h.responseWriter.WriteErrorResponse(ctx, w, code, http.StatusText(code))
+		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
 		return
 	}
 

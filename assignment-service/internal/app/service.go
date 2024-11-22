@@ -229,24 +229,35 @@ func (s *Service) ChangeIsCompletedByID(ctx context.Context, userID string, assi
 		return Assignment{}, serviceErr
 	}
 
-	if assignment.IsCompleted != isCompleted && isCompleted {
-		if err := s.triggerMissionEvent(ctx, userID, missionservice.TriggerMissionEvent_MISSION_EVENT_DONE_ASSIGNMENT); err != nil {
-			return Assignment{}, NewInternalServiceError(err)
-		}
-	}
-
-	if assignment.IsCompleted != isCompleted && !isCompleted {
-		if err := s.triggerMissionEvent(ctx, userID, missionservice.TriggerMissionEvent_MISSION_EVENT_UNDONE_ASSIGNMENT); err != nil {
-			return Assignment{}, NewInternalServiceError(err)
-		}
+	tx, err := s.repository.BeginTransaction(ctx)
+	if err != nil {
+		return Assignment{}, NewInternalServiceError(err)
 	}
 
 	assignment.IsCompleted = isCompleted
 
-	assignment, err := s.assignmentRepository.UpdateAssignmentWith(ctx, assignment)
+	assignment, err = s.assignmentRepository.UpdateAssignmentWithTransaction(ctx, tx, assignment)
 	if err != nil {
 		return Assignment{}, NewInternalServiceError(err)
 	}
+
+	var event missionservice.TriggerMissionEvent
+
+	if assignment.IsCompleted != isCompleted && isCompleted {
+		event = missionservice.TriggerMissionEvent_MISSION_EVENT_DONE_ASSIGNMENT
+	}
+
+	if assignment.IsCompleted != isCompleted && !isCompleted {
+		event = missionservice.TriggerMissionEvent_MISSION_EVENT_UNDONE_ASSIGNMENT
+
+	}
+
+	if err := s.triggerMissionEvent(ctx, userID, event); err != nil {
+		tx.Rollback()
+		return Assignment{}, NewInternalServiceError(err)
+	}
+
+	tx.Commit()
 
 	return assignment, nil
 }
