@@ -8,6 +8,7 @@ import (
 	"github.com/MasLazu/dev-ops-porto/pkg/middleware"
 	"github.com/MasLazu/dev-ops-porto/pkg/util"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type HttpHandler struct {
@@ -84,7 +85,7 @@ func (h *HttpHandler) CreateAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assignment, err := h.service.CreateAssignment(ctx, userID, request)
+	assignment, err := h.service.CreateAssignment(ctx, uuid.MustParse(userID), request)
 	if err != nil {
 		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
 		return
@@ -103,7 +104,7 @@ func (h *HttpHandler) GetAssignments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assignments, err := h.service.GetAssignments(ctx, userID)
+	assignments, err := h.service.GetAssignments(ctx, uuid.MustParse(userID))
 	if err != nil {
 		h.responseWriter.WriteInternalServerErrorResponse(ctx, w, err)
 		return
@@ -128,7 +129,7 @@ func (h *HttpHandler) GetAssignmentByID(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	assignment, serviceErr := h.service.GetAssignmentByID(ctx, userID, assignmentID)
+	assignment, serviceErr := h.service.GetAssignmentByID(ctx, uuid.MustParse(userID), int32(assignmentID))
 	if serviceErr != nil {
 		code := serviceErr.Code()
 		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
@@ -153,7 +154,7 @@ func (h *HttpHandler) DeleteAssignmentByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if serviceErr := h.service.DeleteAssignmentByID(ctx, userID, assignmentID); serviceErr != nil {
+	if serviceErr := h.service.DeleteAssignmentByID(ctx, uuid.MustParse(userID), int32(assignmentID)); serviceErr != nil {
 		code := serviceErr.Code()
 		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
 	}
@@ -188,7 +189,7 @@ func (h *HttpHandler) UpdateAssignmentByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	assignment, serviceErr := h.service.UpdateAssignmentByID(ctx, userID, assignmentID, request)
+	assignment, serviceErr := h.service.UpdateAssignmentByID(ctx, uuid.MustParse(userID), int32(assignmentID), request)
 	if serviceErr != nil {
 		code := serviceErr.Code()
 		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)
@@ -218,7 +219,7 @@ func (h *HttpHandler) ChangeIsCompletedByID(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	assignment, serviceErr := h.service.ChangeIsCompletedByID(ctx, userID, request.ID, request.IsCompleted)
+	assignment, serviceErr := h.service.ChangeIsCompletedByID(ctx, uuid.MustParse(userID), int32(request.ID), request.IsCompleted)
 	if serviceErr != nil {
 		code := serviceErr.Code()
 		h.responseWriter.WriteJSONResponseWithInternalError(ctx, w, code, http.StatusText(code), nil, serviceErr)

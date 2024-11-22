@@ -3,142 +3,109 @@ package app
 import (
 	"context"
 	"database/sql"
+	"log"
+	"time"
 
+	"github.com/MasLazu/dev-ops-porto/assignment-service/.gen/database/public/table"
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
+	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/trace"
+
+	//lint:ignore ST1001 "github.com/go-jet/jet/v2/postgres"
+	. "github.com/go-jet/jet/v2/postgres"
 )
 
+var AssignmentTable = table.Assignments.AS("assignment")
+
 type AssignmentRepository struct {
-	db *database.Service
+	db     *database.Service
+	tracer trace.Tracer
 }
 
-func NewAssignmentRepository(db *database.Service) *AssignmentRepository {
-	return &AssignmentRepository{db: db}
+func NewAssignmentRepository(db *database.Service, tracer trace.Tracer) *AssignmentRepository {
+	return &AssignmentRepository{db: db, tracer: tracer}
 }
 
 func (r *AssignmentRepository) InsertAssignmentWithTransaction(ctx context.Context, tx *sql.Tx, assignment Assignment) (Assignment, error) {
-	query := `
-	INSERT INTO assignments (user_id, title, note, due_date) 
-	VALUES ($1, $2, $3, $4)
-	RETURNING id, user_id, title, note, due_date, created_at, updated_at
-	`
+	ctx, span := r.tracer.Start(ctx, "AssignmentRepository.InsertAssignmentWithTransaction")
+	defer span.End()
+
+	query := AssignmentTable.INSERT(AssignmentTable.UserID, AssignmentTable.Title, AssignmentTable.Note, AssignmentTable.DueDate).
+		VALUES(assignment.UserID, assignment.Title, assignment.Note, assignment.DueDate).
+		RETURNING(AssignmentTable.AllColumns)
 
 	var a Assignment
-	err := tx.QueryRowContext(ctx, query, assignment.UserID, assignment.Title, assignment.Note, assignment.DueDate).Scan(
-		&a.ID, &a.UserID, &a.Title, &a.Note, &a.DueDate, &a.CreatedAt, &a.UpdatedAt,
-	)
+	err := query.QueryContext(ctx, tx, &a)
 
-	return a, err
-
-}
-
-func (r *AssignmentRepository) FindAssignmentsByUserIDJoinReminders(ctx context.Context, userID string) ([]Assignment, error) {
-	query := `
-	SELECT a.id, a.user_id, a.title, a.note, a.due_date, a.is_completed, a.is_important, a.created_at, a.updated_at, r.id, r.assignment_id, r.date, r.created_at, r.updated_at
-	FROM assignments a
-	LEFT JOIN reminders r ON a.id = r.assignment_id
-	WHERE a.user_id = $1
-	`
-
-	rows, err := r.db.Pool.QueryContext(ctx, query, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	assignments := make([]Assignment, 0)
-	for rows.Next() {
-		var a Assignment
-		var r Reminder
-		err := rows.Scan(&a.ID, &a.UserID, &a.Title, &a.Note, &a.DueDate, &a.IsCompleted, &a.IsImportant, &a.CreatedAt, &a.UpdatedAt,
-			&r.ID, &r.AssignmentID, &r.Date, &r.CreatedAt, &r.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
-
-		assignmentExist := false
-		for i, assignment := range assignments {
-			if assignment.ID == a.ID {
-				assignments[i].Reminders = append(assignments[i].Reminders, r)
-				assignmentExist = true
-				break
-			}
-		}
-
-		if !assignmentExist {
-			a.Reminders = append(a.Reminders, r)
-			assignments = append(assignments, a)
-		}
-	}
-
-	return assignments, nil
-}
-
-func (r *AssignmentRepository) FindAssignmentByIDJoinReminders(ctx context.Context, assignmentID int) (Assignment, error) {
-	query := `
-	SELECT a.id, a.user_id, a.title, a.note, a.due_date, a.is_completed, a.is_important, a.created_at, a.updated_at, r.id, r.assignment_id, r.date, r.created_at, r.updated_at
-	FROM assignments a
-	LEFT JOIN reminders r ON a.id = r.assignment_id
-	WHERE a.id = $1
-	`
-
-	var a Assignment
-	row, err := r.db.Pool.QueryContext(ctx, query, assignmentID)
-	if err != nil {
-		return a, err
-	}
-	defer row.Close()
-
-	rowFound := false
-	for row.Next() {
-		rowFound = true
-		var r Reminder
-		err = row.Scan(&a.ID, &a.UserID, &a.Title, &a.Note, &a.DueDate, &a.IsCompleted, &a.IsImportant, &a.CreatedAt, &a.UpdatedAt, &r.ID, &r.AssignmentID, &r.Date, &r.CreatedAt, &r.UpdatedAt)
-		a.Reminders = append(a.Reminders, r)
-	}
-	if !rowFound {
-		return a, sql.ErrNoRows
-	}
+	log.Println("assignment", a)
 
 	return a, err
 }
 
-func (r *AssignmentRepository) FindAssignmentByID(ctx context.Context, assignmentID int) (Assignment, error) {
-	query := `
-	SELECT id, user_id, title, note, due_date, is_completed, is_important, created_at, updated_at
-	FROM assignments
-	WHERE id = $1
-	`
+func (r *AssignmentRepository) FindAssignmentsByUserIDJoinReminders(ctx context.Context, userID uuid.UUID) ([]Assignment, error) {
+	ctx, span := r.tracer.Start(ctx, "AssignmentRepository.FindAssignmentsByUserIDJoinReminders")
+	defer span.End()
+
+	query := AssignmentTable.SELECT(AssignmentTable.AllColumns, ReminderTable.AllColumns).
+		FROM(AssignmentTable.LEFT_JOIN(ReminderTable, AssignmentTable.ID.EQ(ReminderTable.AssignmentID))).
+		WHERE(AssignmentTable.UserID.EQ(UUID(userID)))
+
+	var AssignmentTable []Assignment
+	err := query.QueryContext(ctx, r.db.Pool, &AssignmentTable)
+
+	return AssignmentTable, err
+}
+
+func (r *AssignmentRepository) FindAssignmentByIDJoinReminders(ctx context.Context, assignmentID int32) (Assignment, error) {
+	ctx, span := r.tracer.Start(ctx, "AssignmentRepository.FindAssignmentByIDJoinReminders")
+	defer span.End()
+
+	query := AssignmentTable.SELECT(AssignmentTable.AllColumns, ReminderTable.AllColumns).
+		FROM(AssignmentTable.LEFT_JOIN(ReminderTable, AssignmentTable.ID.EQ(ReminderTable.AssignmentID))).
+		WHERE(AssignmentTable.ID.EQ(Int32(assignmentID)))
 
 	var a Assignment
-	err := r.db.Pool.QueryRowContext(ctx, query, assignmentID).Scan(
-		&a.ID, &a.UserID, &a.Title, &a.Note, &a.DueDate, &a.IsCompleted, &a.IsImportant, &a.CreatedAt, &a.UpdatedAt,
-	)
+	err := query.QueryContext(ctx, r.db.Pool, &a)
 
 	return a, err
 }
 
-func (r *AssignmentRepository) DeleteAssignmentByIDWithTransaction(ctx context.Context, tx *sql.Tx, assignmentID int) error {
-	query := `
-	DELETE FROM assignments
-	WHERE id = $1
-	`
+func (r *AssignmentRepository) FindAssignmentByID(ctx context.Context, assignmentID int32) (Assignment, error) {
+	ctx, span := r.tracer.Start(ctx, "AssignmentRepository.FindAssignmentByID")
+	defer span.End()
 
-	_, err := tx.ExecContext(ctx, query, assignmentID)
+	query := AssignmentTable.SELECT(AssignmentTable.AllColumns).
+		FROM(AssignmentTable).
+		WHERE(AssignmentTable.ID.EQ(Int32(assignmentID)))
+
+	var a Assignment
+	err := query.QueryContext(ctx, r.db.Pool, &a)
+
+	return a, err
+}
+
+func (r *AssignmentRepository) DeleteAssignmentByIDWithTransaction(ctx context.Context, tx *sql.Tx, assignmentID int32) error {
+	ctx, span := r.tracer.Start(ctx, "AssignmentRepository.DeleteAssignmentByIDWithTransaction")
+	defer span.End()
+
+	query := AssignmentTable.DELETE().
+		WHERE(AssignmentTable.ID.EQ(Int32(assignmentID)))
+
+	_, err := query.ExecContext(ctx, tx)
 	return err
 }
 
 func (r *AssignmentRepository) UpdateAssignmentWithTransaction(ctx context.Context, tx *sql.Tx, assignment Assignment) (Assignment, error) {
-	query := `
-	UPDATE assignments
-	SET title = $1, note = $2, due_date = $3, is_completed = $4, is_important = $5, updated_at = NOW()
-	WHERE id = $6
-	RETURNING id, user_id, title, note, due_date, is_completed, is_important, created_at, updated_at
-	`
+	ctx, span := r.tracer.Start(ctx, "AssignmentRepository.UpdateAssignmentWithTransaction")
+	defer span.End()
+
+	query := AssignmentTable.UPDATE(AssignmentTable.Title, AssignmentTable.Note, AssignmentTable.DueDate, AssignmentTable.IsCompleted, AssignmentTable.IsImportant, AssignmentTable.UpdatedAt).
+		SET(assignment.Title, assignment.Note, assignment.DueDate, assignment.IsCompleted, assignment.IsImportant, time.Now()).
+		WHERE(AssignmentTable.ID.EQ(Int32(assignment.ID))).
+		RETURNING(AssignmentTable.AllColumns)
 
 	var a Assignment
-	err := tx.QueryRowContext(ctx, query, assignment.Title, assignment.Note, assignment.DueDate, assignment.IsCompleted, assignment.IsImportant, assignment.ID).Scan(
-		&a.ID, &a.UserID, &a.Title, &a.Note, &a.DueDate, &a.IsCompleted, &a.IsImportant, &a.CreatedAt, &a.UpdatedAt,
-	)
+	err := query.QueryContext(ctx, tx, &a)
 
 	return a, err
 }

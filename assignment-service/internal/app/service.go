@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/genproto/missionservice"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -34,12 +35,12 @@ func NewService(
 	}
 }
 
-func (s *Service) triggerMissionEvent(ctx context.Context, userID string, event missionservice.TriggerMissionEvent) error {
+func (s *Service) triggerMissionEvent(ctx context.Context, userID uuid.UUID, event missionservice.TriggerMissionEvent) error {
 	_, triggerMissionEventSpan := s.tracer.Start(ctx, "Service.triggerMissionEvent")
 	defer triggerMissionEventSpan.End()
 
 	_, err := s.missionServiceClient.TriggerMissionEvent(ctx, &missionservice.TriggerMissionEventRequest{
-		UserId: userID,
+		UserId: userID.String(),
 		Event:  event,
 	})
 	if err != nil {
@@ -48,7 +49,7 @@ func (s *Service) triggerMissionEvent(ctx context.Context, userID string, event 
 	return err
 }
 
-func (s *Service) getAuthorizedAssignmentByID(ctx context.Context, userID string, assignmentID int) (Assignment, ServiceError) {
+func (s *Service) getAuthorizedAssignmentByID(ctx context.Context, userID uuid.UUID, assignmentID int32) (Assignment, ServiceError) {
 	assignment, err := s.assignmentRepository.FindAssignmentByIDJoinReminders(ctx, assignmentID)
 	if err == sql.ErrNoRows {
 		return Assignment{}, NewClientError(http.StatusNotFound, err)
@@ -74,7 +75,7 @@ func (s *Service) HealthCheck(ctx context.Context) map[string]map[string]string 
 	return res
 }
 
-func (s *Service) CreateAssignment(ctx context.Context, userID string, request CreateAssignmentRequest) (Assignment, ServiceError) {
+func (s *Service) CreateAssignment(ctx context.Context, userID uuid.UUID, request CreateAssignmentRequest) (Assignment, ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.CreateAssignment")
 	defer span.End()
 
@@ -116,7 +117,7 @@ func (s *Service) CreateAssignment(ctx context.Context, userID string, request C
 	return assignment, nil
 }
 
-func (s *Service) GetAssignments(ctx context.Context, userID string) ([]Assignment, ServiceError) {
+func (s *Service) GetAssignments(ctx context.Context, userID uuid.UUID) ([]Assignment, ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.GetAssignments")
 	defer span.End()
 
@@ -128,7 +129,7 @@ func (s *Service) GetAssignments(ctx context.Context, userID string) ([]Assignme
 	return assignments, nil
 }
 
-func (s *Service) GetAssignmentByID(ctx context.Context, userID string, assignmentID int) (Assignment, ServiceError) {
+func (s *Service) GetAssignmentByID(ctx context.Context, userID uuid.UUID, assignmentID int32) (Assignment, ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.GetAssignmentByID")
 	defer span.End()
 
@@ -140,7 +141,7 @@ func (s *Service) GetAssignmentByID(ctx context.Context, userID string, assignme
 	return assignment, nil
 }
 
-func (s *Service) DeleteAssignmentByID(ctx context.Context, userID string, assignmentID int) ServiceError {
+func (s *Service) DeleteAssignmentByID(ctx context.Context, userID uuid.UUID, assignmentID int32) ServiceError {
 	ctx, span := s.tracer.Start(ctx, "Service.DeleteAssignmentByID")
 	defer span.End()
 
@@ -175,7 +176,7 @@ func (s *Service) DeleteAssignmentByID(ctx context.Context, userID string, assig
 	return nil
 }
 
-func (s *Service) UpdateAssignmentByID(ctx context.Context, userID string, assignmentID int, request UpdateAssignmentRequest) (Assignment, ServiceError) {
+func (s *Service) UpdateAssignmentByID(ctx context.Context, userID uuid.UUID, assignmentID int32, request UpdateAssignmentRequest) (Assignment, ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.UpdateAssignmentByID")
 	defer span.End()
 
@@ -220,7 +221,7 @@ func (s *Service) UpdateAssignmentByID(ctx context.Context, userID string, assig
 	return assignment, nil
 }
 
-func (s *Service) ChangeIsCompletedByID(ctx context.Context, userID string, assignmentID int, isCompleted bool) (Assignment, ServiceError) {
+func (s *Service) ChangeIsCompletedByID(ctx context.Context, userID uuid.UUID, assignmentID int32, isCompleted bool) (Assignment, ServiceError) {
 	ctx, span := s.tracer.Start(ctx, "Service.ChangeIsCompletedByID")
 	defer span.End()
 
@@ -234,7 +235,7 @@ func (s *Service) ChangeIsCompletedByID(ctx context.Context, userID string, assi
 		return Assignment{}, NewInternalServiceError(err)
 	}
 
-	assignment.IsCompleted = isCompleted
+	assignment.IsCompleted = &isCompleted
 
 	assignment, err = s.assignmentRepository.UpdateAssignmentWithTransaction(ctx, tx, assignment)
 	if err != nil {
@@ -243,11 +244,11 @@ func (s *Service) ChangeIsCompletedByID(ctx context.Context, userID string, assi
 
 	var event missionservice.TriggerMissionEvent
 
-	if assignment.IsCompleted != isCompleted && isCompleted {
+	if *assignment.IsCompleted != isCompleted && isCompleted {
 		event = missionservice.TriggerMissionEvent_MISSION_EVENT_DONE_ASSIGNMENT
 	}
 
-	if assignment.IsCompleted != isCompleted && !isCompleted {
+	if *assignment.IsCompleted != isCompleted && !isCompleted {
 		event = missionservice.TriggerMissionEvent_MISSION_EVENT_UNDONE_ASSIGNMENT
 
 	}

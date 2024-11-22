@@ -3,12 +3,16 @@ package app
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"strings"
 
 	"github.com/MasLazu/dev-ops-porto/pkg/database"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/MasLazu/dev-ops-porto/assignment-service/.gen/database/public/table"
+	//lint:ignore ST1001 "github.com/go-jet/jet/v2/postgres"
+	. "github.com/go-jet/jet/v2/postgres"
 )
+
+var ReminderTable = table.Reminders.AS("reminder")
 
 type ReminderRepository struct {
 	db     *database.Service
@@ -23,16 +27,12 @@ func (r *ReminderRepository) InsertReminder(ctx context.Context, reminder Remind
 	ctx, span := r.tracer.Start(ctx, "ReminderRepository.InsertReminder")
 	defer span.End()
 
-	query := `
-	INSERT INTO reminders (assignment_id, date) 
-	VALUES ($1, $2)
-	RETURNING id, assignment_id, date, created_at, updated_at
-	`
+	query := ReminderTable.INSERT(ReminderTable.AssignmentID, ReminderTable.Date).
+		VALUES(reminder.AssignmentID, reminder.Date).
+		RETURNING(ReminderTable.AllColumns)
 
 	var rd Reminder
-	err := r.db.Pool.QueryRowContext(ctx, query, reminder.AssignmentID, reminder.Date).Scan(
-		&rd.ID, &rd.AssignmentID, &rd.Date, &rd.CreatedAt, &rd.UpdatedAt,
-	)
+	err := query.QueryContext(ctx, r.db.Pool, &rd)
 
 	return rd, err
 }
@@ -41,49 +41,27 @@ func (r *ReminderRepository) InsertRemindersWithTransaction(ctx context.Context,
 	ctx, span := r.tracer.Start(ctx, "ReminderRepository.InsertRemindersWithTransaction")
 	defer span.End()
 
+	query := ReminderTable.INSERT(ReminderTable.AssignmentID, ReminderTable.Date).
+		RETURNING(ReminderTable.AllColumns)
+
+	for _, rem := range reminders {
+		query = query.VALUES(rem.AssignmentID, rem.Date)
+	}
+
 	var insertedReminders []Reminder
-	if len(reminders) == 0 {
-		return insertedReminders, nil
-	}
+	err := query.QueryContext(ctx, tx, &insertedReminders)
 
-	var values []string
-	var args []interface{}
-	for i, rem := range reminders {
-		values = append(values, fmt.Sprintf("($%d, $%d)", i*2+1, i*2+2))
-		args = append(args, rem.AssignmentID, rem.Date)
-	}
-
-	query := fmt.Sprintf(`
-	INSERT INTO reminders (assignment_id, date) 
-	VALUES %s 
-	RETURNING id, assignment_id, date, created_at, updated_at`, strings.Join(values, ", "))
-
-	rows, err := tx.QueryContext(ctx, query, args...)
-	if err != nil {
-		return insertedReminders, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var rem Reminder
-		if err := rows.Scan(&rem.ID, &rem.AssignmentID, &rem.Date, &rem.CreatedAt, &rem.UpdatedAt); err != nil {
-			return nil, err
-		}
-		insertedReminders = append(insertedReminders, rem)
-	}
-
-	return insertedReminders, nil
+	return insertedReminders, err
 }
 
-func (r *ReminderRepository) DeleteRemindersByAssignmentIDWithTransaction(ctx context.Context, tx *sql.Tx, assignmentID int) error {
+func (r *ReminderRepository) DeleteRemindersByAssignmentIDWithTransaction(ctx context.Context, tx *sql.Tx, assignmentID int32) error {
 	ctx, span := r.tracer.Start(ctx, "ReminderRepository.DeleteRemindersByAssignmentIDWithTransaction")
 	defer span.End()
 
-	query := `
-	DELETE FROM reminders
-	WHERE assignment_id = $1
-	`
+	query := ReminderTable.DELETE().
+		WHERE(ReminderTable.AssignmentID.EQ(Int32(assignmentID)))
 
-	_, err := tx.ExecContext(ctx, query, assignmentID)
+	_, err := query.ExecContext(ctx, tx)
+
 	return err
 }

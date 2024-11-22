@@ -1,29 +1,33 @@
 package app
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Assignment struct {
-	ID          int        `json:"id"`
-	UserID      string     `json:"user_id"`
+	ID          int32      `json:"id" sql:"primary_key"`
+	UserID      uuid.UUID  `json:"user_id"`
 	Title       string     `json:"title"`
-	Note        string     `json:"note"`
-	DueDate     time.Time  `json:"due_date"`
-	IsCompleted bool       `json:"is_completed"`
-	IsImportant bool       `json:"is_important"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	Note        *string    `json:"note"`
+	DueDate     *time.Time `json:"due_date"`
+	IsCompleted *bool      `json:"is_completed"`
+	IsImportant *bool      `json:"is_important"`
+	CreatedAt   *time.Time `json:"created_at"`
+	UpdatedAt   *time.Time `json:"updated_at"`
 	Reminders   []Reminder `json:"reminders,omitempty"`
 }
 
 type CreateAssignmentRequest struct {
 	Title       string                  `json:"title" validate:"required"`
-	Note        string                  `json:"note" validate:"required"`
-	DueDate     time.Time               `json:"due_date" validate:"required"`
-	IsImportant bool                    `json:"is_important"`
+	Note        *string                 `json:"note" validate:"required"`
+	DueDate     *time.Time              `json:"due_date" validate:"required"`
+	IsImportant *bool                   `json:"is_important"`
 	Reminders   []CreateReminderRequest `json:"reminders,omitempty" validate:"dive"`
 }
 
-func (car *CreateAssignmentRequest) toAssignmentAndReminders(userID string) (Assignment, []Reminder) {
+func (car *CreateAssignmentRequest) toAssignmentAndReminders(userID uuid.UUID) (Assignment, []Reminder) {
 	var reminders []Reminder
 	for _, reminder := range car.Reminders {
 		reminders = append(reminders, Reminder{
@@ -42,16 +46,16 @@ func (car *CreateAssignmentRequest) toAssignmentAndReminders(userID string) (Ass
 
 type UpdateAssignmentRequest struct {
 	Title       string                  `json:"title" validate:"required"`
-	Note        string                  `json:"note" validate:"required"`
-	DueDate     time.Time               `json:"due_date" validate:"required,future"`
-	IsImportant bool                    `json:"is_important"`
-	IsCompleted bool                    `json:"is_completed"`
+	Note        *string                 `json:"note" validate:"required"`
+	DueDate     *time.Time              `json:"due_date" validate:"required,future"`
+	IsImportant *bool                   `json:"is_important"`
+	IsCompleted *bool                   `json:"is_completed"`
 	Reminders   []CreateReminderRequest `json:"reminders,omitempty" validate:"dive"`
 }
 
 type ChangeIsCompletedRequest struct {
-	ID          int  `json:"id" validate:"required"`
-	IsCompleted bool `json:"is_completed"`
+	ID          int32 `json:"id" validate:"required"`
+	IsCompleted bool  `json:"is_completed"`
 }
 
 func (uar *UpdateAssignmentRequest) toAssignment() Assignment {

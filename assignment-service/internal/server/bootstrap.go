@@ -18,7 +18,7 @@ func bootstrap(config config, db *database.Service, logger *monitoring.Logger, m
 	validator := util.NewValidator(tracer)
 	handlerTracer := util.NewHandlerTracer(tracer)
 	repository := app.NewRepository(db)
-	assignmentRepository := app.NewAssignmentRepository(db)
+	assignmentRepository := app.NewAssignmentRepository(db, tracer)
 	reminderRepository := app.NewReminderRepository(db, tracer)
 	service := app.NewService(tracer, repository, assignmentRepository, reminderRepository, missionServiceClient)
 	authMiddleware := middleware.NewAuthMiddleware(config.jwtSecret, responseWriter, handlerTracer)
